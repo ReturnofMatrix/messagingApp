@@ -1,0 +1,25 @@
+.auth-container {
+  max-width: 400px;
+  margin: 5rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-container label {
+  margin: 0.5rem 0 0.2rem;
+}
+
+.auth-container input {
+  margin-bottom: 0.5rem;
+}
+
+.auth-container button {
+  margin-top: 1rem;
+}

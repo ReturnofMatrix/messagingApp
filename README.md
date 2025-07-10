@@ -14,7 +14,7 @@ core features
 BACKEND 
 i will have 
 1) post('/signup') 
-    will send email, username, password, confirm password, name, age, bio, birthday, hobbies.
+    will send email, username, password, confirm password, bio, birthday, hobbies.
     bcrypt password.
 
 2) post('/login')

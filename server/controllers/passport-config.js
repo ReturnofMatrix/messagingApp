@@ -1,3 +1,5 @@
+// passport-config.js
+
 const LocalStrategy = require('passport-local').Strategy;
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
@@ -40,4 +42,12 @@ function initialize(passport){
         }
     });
 }
-module.exports = initialize;
+
+function isAuthenticated(req, res, next){
+    if(req.isAuthenticated()){
+        return next()
+    }
+    return res.status(401).json({message : "you need to be logged in."});
+}
+
+module.exports = { initialize, isAuthenticated };

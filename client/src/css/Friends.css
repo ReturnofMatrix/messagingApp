@@ -1,0 +1,18 @@
+.friends-list {
+  max-width: 400px;
+  margin: 2rem auto;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.friends-list li {
+  list-style: none;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.friends-list li:hover {
+  background: #f0f0f0;
+}

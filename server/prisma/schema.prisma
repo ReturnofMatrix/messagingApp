@@ -15,10 +15,13 @@ datasource db {
 }
 
 model User{
-  id    Int   @id @default(autoincrement())
-  email   String @unique
-  username  String  @unique
-  hashedpass  String
+  id             Int   @id @default(autoincrement())
+  email          String @unique
+  username       String  @unique
+  hashedpass     String
+  birthday       String
+  bio            String
+  hobbies        String 
   sentmessages  Messages[]  @relation("UserSentMessages")
   receivedmessages  Messages[]  @relation("UserReceivedMessages")
 }
@@ -28,6 +31,7 @@ model Messages{
   senderid  Int 
   receiverid  Int  
   text  String
+  time  DateTime
   sender  User  @relation("UserSentMessages", fields: [senderid], references: [id])
   receiver  User  @relation("UserReceivedMessages", fields: [receiverid], references: [id])
 }

@@ -1,0 +1,29 @@
+.message-row {
+  display: flex;
+  width: 100%;
+  margin: 0.25rem 0;
+}
+
+.message-row.mine {
+  justify-content: flex-start;
+  background: #DCF8C6;
+}
+
+.message-row.theirs {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  max-width: 60%;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  word-wrap: break-word;
+}
+
+.message-bubble.mine {
+  background: #DCF8C6;
+}
+
+.message-bubble.theirs {
+  background: #FFFFFF;
+}
