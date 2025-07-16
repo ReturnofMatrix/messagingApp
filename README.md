@@ -1,4 +1,10 @@
 # messagingApp
+* post will be the first feature i will be building. 
+    things involved in db of post.
+    post has id, who created post, who liked post, who commented on post.
+    time of creation, actual content.
+
+
 core features 
 1) Authorization
     here i will do first signup and then login. token saved in users browsers when user requests token is verified for authentication.
@@ -38,3 +44,6 @@ Database
 1) user -> id, email, username, bcrypted password, name, age, bio, birthday, hobbies.
 
 2) message -> id, senderId, receiverId, messageContent, sentTime
+
+//learned how to do authentication with passport, cookie, protecting routes. integration of frontend and backend. loved all the things about this project had mad mad fun.
+

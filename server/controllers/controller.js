@@ -96,3 +96,119 @@ exports.edit = async ( req, res) => {
     console.log(allInfo);
     res.status(200).json({ allInfo});
 }
+
+//Post i can add 1) createPost 2) getAllPosts 3) deletePost
+exports.createPost = async ( req, res) => {
+    const author_id = req.user.id;
+    const content = req.body.content;
+    let post = 'post content is empty.';
+    if(content.trim()){
+        post = await db.createPost(author_id, content);
+    }
+    res.status(200).json({post});
+}
+
+exports.getAllPosts = async ( req, res) => {
+    const author_id = req.user.id;
+    const post = await db.getUserPosts(author_id);
+    res.status(201).json({post});
+}
+
+exports.deletePost = async ( req, res) => {
+    const id = parseInt(req.params.id);
+    const author_id = req.user.id;
+    const result = await db.deletePost(id, author_id);
+    res.status(200).json({result});
+}
+
+// 1) createComment, 2) get All The comments on the post 
+// 3) delete comment 4) if post is deleted then all its comments are also deleted.
+exports.createComment = async ( req, res) => {
+    const post_id = parseInt(req.params.post_id);
+    const text = req.body.text;
+    const created_by = req.user.id;
+
+    const result = await db.createComment(created_by, text, post_id);
+    res.status(201).json({ result })
+}
+
+exports.getAllComments = async ( req, res) => {
+    const post_id = parseInt(req.params.post_id);
+    const created_by = req.user.id;
+    const result = await db.getAllComments(post_id);
+    res.status(201).json({ result })
+}
+
+exports.deleteComment = async ( req, res) => {
+    const id = parseInt(req.params.id);
+
+    const result = await db.deleteComment(id);
+    res.status(201).json({ result })
+}
+
+// I can like
+exports.addLiked = async ( req, res) => {
+    const post_id = parseInt(req.params.post_id);
+    const liked_by = req.user.id;
+    const result = await db.addLiked(post_id, liked_by);
+    res.status(201).json({ result });
+}
+
+exports.getAllLikes = async ( req, res) => {
+    const post_id = parseInt(req.params.post_id);
+    const liked_by = req.user.id;
+    const result = await db.getAllLikes(post_id);
+    res.status(201).json({ result });
+}
+
+exports.deleteLike = async ( req, res) => {
+    const id = parseInt(req.params.id);
+    const liked_by = req.user.id;
+    const result = await db.deleteLike(id);
+    res.status(201).json({ result });
+}
+
+// how should i think about friends. like can a user send friend requests.
+// lets say i make a new table called friends where i will list all the 
+// requested, accepted friends.
+
+// anyone can send requests and only requested person can accept or reject.
+exports.addFriend = async ( req, res) => {
+    const request_to = parseInt(req.params.id);
+    const request_by = parseInt(req.user.id);
+    const result = await db.addFriend(request_by, request_to);
+    res.status(201).json({ result });
+}
+
+//accept and reject are both requests sent by someone else to us.
+// so request to will be us and request by someone else.
+// here while display friend list sender and receiver id will be sent.
+exports.acceptFriend = async ( req, res) => {
+    const id = parseInt(req.params.id);
+    const result = await db.acceptFriend( id );
+    res.status(201).json({ result });
+}
+exports.rejectFriend = async ( req, res) => {
+    const id = parseInt(req.params.id);
+    const result = await db.rejectFriend( id );
+    res.status(201).json({ result });
+}
+
+// here request_by and request_to can be user as we want to show the
+// me as sender where request is accepted in friends. and other sent request 
+// to me for accept or reject.
+// but pending and accepted status will determine the friend or not status.
+exports.getAllFriends = async ( req, res) => {
+    const id = parseInt(req.user.id);
+    const result = await db.getAllFriends(id);
+    res.status(201).json({ result });
+}
+
+// here only request which logged in user made and which have been accepted.
+// only their posts are to be shown but here i have to add user posts also.
+// post are ordered by created time in ascending order.
+exports.getIndexPage = async ( req, res) => {
+    const request_by = req.user.id;
+    const posts = await db.getOnlyFriendsPost( request_by );
+    res.status(200).json({ posts });
+}

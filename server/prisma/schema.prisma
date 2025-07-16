@@ -14,6 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Messages{
+  id  Int   @id @default(autoincrement())
+  senderid  Int 
+  receiverid  Int  
+  text  String
+  time  DateTime
+  sender  User  @relation("UserSentMessages", fields: [senderid], references: [id])
+  receiver  User  @relation("UserReceivedMessages", fields: [receiverid], references: [id])
+}
+
 model User{
   id             Int   @id @default(autoincrement())
   email          String @unique
@@ -24,14 +34,54 @@ model User{
   hobbies        String 
   sentmessages  Messages[]  @relation("UserSentMessages")
   receivedmessages  Messages[]  @relation("UserReceivedMessages")
+
+  createdPosts   Post[]  @relation("UserCreatedPosts")
+  comments  Comment[]   @relation("userCanComment")
+  likes   Likes[]   @relation("UserLikedPost")
+
+  requests  Friends[]   @relation("userRequestsFriend")
+  getsRequest Friends[] @relation("userGetsRequest")
 }
 
-model Messages{
-  id  Int   @id @default(autoincrement())
-  senderid  Int 
-  receiverid  Int  
+model Post{
+  id   Int   @id   @default(autoincrement())
+  content   String
+  created_at    DateTime
+  author_id  Int
+
+  hasComments   Comment[]   @relation("postHasComments")
+  hasLikes   Likes[]  @relation("postHasLikes")
+  author    User  @relation("UserCreatedPosts", fields: [author_id], references: [id])
+}
+
+model Likes{
+  id  Int   @id   @default(autoincrement())
+  liked_at  DateTime
+  liked_by  Int
+  post_id   Int
+
+  post   Post  @relation("postHasLikes", fields: [post_id], references: [id])
+  user  User  @relation("UserLikedPost",fields: [liked_by], references: [id])
+}
+
+model Comment{
+  id  Int @id   @default(autoincrement())
   text  String
-  time  DateTime
-  sender  User  @relation("UserSentMessages", fields: [senderid], references: [id])
-  receiver  User  @relation("UserReceivedMessages", fields: [receiverid], references: [id])
+  created_at   DateTime
+  created_by  Int
+  post_id   Int
+
+  post  Post   @relation("postHasComments", fields: [post_id], references: [id])
+  commenter   User  @relation("userCanComment", fields: [created_by], references: [id])
+}
+
+model Friends{
+  id  Int @id   @default(autoincrement())
+  request_by  Int
+  request_to  Int
+  pending     Boolean @default(true)
+  accepted    Boolean @default(false)
+
+  requester  User  @relation("userRequestsFriend", fields: [request_to], references: [id])
+  requested  User  @relation("userGetsRequest", fields: [request_by], references: [id])
 }

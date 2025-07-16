@@ -23,4 +23,22 @@ router.get('/status', (req, res)=> {
     res.json({isLoggedin: req.isAuthenticated()});
 });
 
+router.post('/post', isAuthenticated, controllers.createPost);
+router.get('/post', isAuthenticated, controllers.getAllPosts);
+router.delete('/deletePost/:id', isAuthenticated, controllers.deletePost);
+
+router.post('/post/:post_id/comment', isAuthenticated, controllers.createComment);
+router.get('/post/:post_id/comments', isAuthenticated, controllers.getAllComments);
+router.delete('/comment/:id', isAuthenticated, controllers.deleteComment);
+
+router.post('/post/:post_id/like', isAuthenticated, controllers.addLiked);
+router.get('/post/:post_id/getLikes', isAuthenticated, controllers.getAllLikes);
+router.delete('/like/:id', isAuthenticated, controllers.deleteLike);
+
+router.post('/friend/request/:id', isAuthenticated, controllers.addFriend);
+router.put('/friend/accept/:id', isAuthenticated, controllers.acceptFriend);
+router.put('/friend/reject/:id', isAuthenticated, controllers.rejectFriend);
+router.get('/friends/get', isAuthenticated, controllers.getAllFriends);
+router.get('/indexPage', isAuthenticated, controllers.getIndexPage);
+
 module.exports = router;
