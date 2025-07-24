@@ -62,6 +62,7 @@ model Likes{
 
   post   Post  @relation("postHasLikes", fields: [post_id], references: [id])
   user  User  @relation("UserLikedPost",fields: [liked_by], references: [id])
+  @@unique([liked_by, post_id])
 }
 
 model Comment{

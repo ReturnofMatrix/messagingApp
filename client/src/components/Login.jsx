@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import '../css/Login.css'
 
 export default function Login(){
     const [username, setUsername] = useState('');
@@ -19,7 +20,6 @@ export default function Login(){
                 throw new Error();
             }
             const data = await res.json();
-            console.log(data);
             if(data.loggedIn){
                 console.log('inside home.');
                 navigate('/home');

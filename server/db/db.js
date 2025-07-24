@@ -102,9 +102,13 @@ async function createComment(created_by, text, post_id) {
     })
 }
 
-async function getAllComments(post_id) {
-    return await prisma.comment.findMany({
-        where: {post_id}
+async function getAllComments(id) {
+    console.log(id);
+    return await prisma.post.findUnique({
+        where: {id},
+        include: { author: {select: { username: true}},
+                   hasLikes: {select: {liked_by: true}},
+                   hasComments: true}
     });
 }
 
@@ -114,23 +118,41 @@ async function deleteComment(id) {
     })
 }
 
-async function addLiked(post_id, liked_by) {
-    return await prisma.likes.create({
-        data: {
-            liked_by, post_id, liked_at: new Date()
-        }
-    })
+async function handleLike(post_id, liked_by) {
+    const liked = await prisma.likes.findUnique({
+        where: { liked_by_post_id: {
+            liked_by, post_id
+        }}
+    });
+    console.log('liked returned.',liked);
+    if(liked){
+        return await prisma.likes.delete({
+            where: { liked_by_post_id: {
+                liked_by, post_id
+            }}
+        });
+    }else{
+        return await prisma.likes.create({
+        data: { liked_by, post_id, liked_at: new Date() }
+        })
+    }
 }
 
-async function getAllLikes( post_id) {
-    return await prisma.likes.findMany()
-}
+// async function getAllLikes( post_id) {
+//     return await prisma.likes.count({
+//         where: {post_id}
+//     })
+// }
 
-async function deleteLike(id) {
-    return await prisma.likes.delete({
-        where: {id}
-    })
-}
+// async function isLiked(liked_by) {
+//     return await prisma.likes.findMany({where: {liked_by}})
+// }
+
+// async function deleteLike(id) {
+//     return await prisma.likes.delete({
+//         where: {id}
+//     })
+// }
 
 async function addFriend( request_by, request_to) {
     return await prisma.friends.create({
@@ -167,19 +189,27 @@ async function getOnlyFriendsPost( request_by ) {
         where: {request_by, accepted: true},
         select: {request_to: true}
     })
-
+    // all the friends is an array of objects which has request_to who 
+    // have accepted the friend request. so by returning the friend.request_to
+    // we get the array of request_to.
     let friendsIds = friends.map(friend => friend.request_to);
     friendsIds.push(request_by);
     console.log(friendsIds);
 
     return await prisma.post.findMany({
         where: {author_id: {in: friendsIds}},
-        orderBy: {created_at : 'asc'}
-    })
+        include: {
+            author: {select: {username: true}}, 
+            hasLikes: {select: {liked_by: true}},
+            hasComments: {select: {id : true}}
+        },
+        orderBy: {created_at : 'desc'}
+    });
 }
 
 module.exports = { signupUser, login, alreadyRegistered, sendMessage,
     getUsers, getProfileInfo, getAllMessages, edit, createPost, getUserPosts,
-    deletePost, createComment, getAllComments, deleteComment, addLiked, getAllLikes, deleteLike,
-    addFriend, acceptFriend, rejectFriend, getAllFriends, getOnlyFriendsPost
+    deletePost, createComment, getAllComments, deleteComment, handleLike,
+    addFriend, acceptFriend, rejectFriend,
+    getAllFriends, getOnlyFriendsPost
 }

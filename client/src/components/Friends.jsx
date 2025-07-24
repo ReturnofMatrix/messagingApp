@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import '../css/Friends.css';
 
 export default function Friends(){
@@ -29,9 +29,12 @@ export default function Friends(){
         }, []);
         
     return (
+        <div>
             <ol className="friends-list">
                 {users.length !== 0 ? 
                 users.map((user) => <li key={user.id} onClick={() => navigate(`message/${user.id}`)}>{user.username}</li>) : <p>There are no users.</p>}
             </ol>
+            < Outlet />
+        </div>
     )
 }

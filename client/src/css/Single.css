@@ -1,0 +1,44 @@
+/* Single.css */
+
+.post {
+  background-color: #f5f5f5;
+  border: 2px solid #666;
+  padding: 2rem;
+  margin: 3rem auto;
+  max-width: 700px;
+  border-radius: 16px;
+  font-family: 'Georgia', serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.post h4 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.post p {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+button {
+  font-size: 1.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.1);
+}
+
+ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+}
+
+li {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}

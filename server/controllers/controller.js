@@ -133,10 +133,18 @@ exports.createComment = async ( req, res) => {
 }
 
 exports.getAllComments = async ( req, res) => {
-    const post_id = parseInt(req.params.post_id);
+    const id = parseInt(req.params.id);
     const created_by = req.user.id;
-    const result = await db.getAllComments(post_id);
-    res.status(201).json({ result })
+    let post = await db.getAllComments(id);
+    const likesCount = post.hasLikes.length;
+    const userLiked = post.hasLikes.some(like => like.liked_by === created_by);
+    post = {
+            ...post,
+            likesCount,
+            userLiked,
+        };
+    console.log(post);
+    res.status(201).json({ post })
 }
 
 exports.deleteComment = async ( req, res) => {
@@ -147,24 +155,10 @@ exports.deleteComment = async ( req, res) => {
 }
 
 // I can like
-exports.addLiked = async ( req, res) => {
+exports.handleLike = async ( req, res) => {
     const post_id = parseInt(req.params.post_id);
     const liked_by = req.user.id;
-    const result = await db.addLiked(post_id, liked_by);
-    res.status(201).json({ result });
-}
-
-exports.getAllLikes = async ( req, res) => {
-    const post_id = parseInt(req.params.post_id);
-    const liked_by = req.user.id;
-    const result = await db.getAllLikes(post_id);
-    res.status(201).json({ result });
-}
-
-exports.deleteLike = async ( req, res) => {
-    const id = parseInt(req.params.id);
-    const liked_by = req.user.id;
-    const result = await db.deleteLike(id);
+    const result = await db.handleLike(post_id, liked_by);
     res.status(201).json({ result });
 }
 
@@ -207,8 +201,22 @@ exports.getAllFriends = async ( req, res) => {
 // here only request which logged in user made and which have been accepted.
 // only their posts are to be shown but here i have to add user posts also.
 // post are ordered by created time in ascending order.
+// indexPage post also contain all the likes count of the post and also
+// weather the post is liked by the user or not.
+
 exports.getIndexPage = async ( req, res) => {
     const request_by = req.user.id;
-    const posts = await db.getOnlyFriendsPost( request_by );
+    let posts = await db.getOnlyFriendsPost( request_by );
+    posts = posts.map(post => {
+        const likeCount = post.hasLikes.length;
+        const userLiked = post.hasLikes.some(like => like.liked_by === request_by);
+        const commentsCount = post.hasComments.length;
+        return{
+            ...post,
+            likeCount,
+            userLiked,
+            commentsCount
+        }
+    });
     res.status(200).json({ posts });
 }

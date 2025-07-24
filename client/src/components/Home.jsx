@@ -27,7 +27,8 @@ export default function Home(){
     return (
   <>
     <div className="navbar">
-      <NavLink to="">Friends</NavLink>
+      <NavLink to='/home'>Home</NavLink>
+      <NavLink to="friends">Friends</NavLink>
       <NavLink to='profile'>Profile</NavLink>
       <button onClick={handleLogout}>Logout</button>
     </div>
