@@ -7,10 +7,12 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const cors = require('cors');
 require('dotenv').config();
+
 app.use(cors({
     origin: 'http://localhost:3000',
     'credentials': true
 }));
+app.use('/uploads', express.static('uploads'));
 
 initialize(passport);
 app.use(express.urlencoded({ extended: false}));

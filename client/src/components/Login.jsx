@@ -21,7 +21,6 @@ export default function Login(){
             }
             const data = await res.json();
             if(data.loggedIn){
-                console.log('inside home.');
                 navigate('/home');
             }
         }catch(e){

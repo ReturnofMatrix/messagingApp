@@ -10,19 +10,29 @@ export default function Signup(){
     const [birthday, setDate] = useState('');
     const [bio, setBio] = useState('');
     const [hobbies, setHobby] = useState('');
+    const [profilePic, setProfilePic] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const navigate = useNavigate();
 
     async function submitForm(e) {
         e.preventDefault();
-        console.log(birthday);
+
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("username", username);
+        formData.append("password", password);
+        formData.append("conpass", conpass);
+        formData.append("birthday", birthday);
+        formData.append("bio", bio);
+        formData.append("hobbies", hobbies);
+
+        if(profilePic)formData.append('profilePic', profilePic);
+
         try{
             const res = await fetch('http://localhost:4000/signup',
                 {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({
-                        email, username, password, conpass, birthday, bio, hobbies
-                    })
+                    body: formData
                 });
             if(!res.ok){
                 throw new Error();
@@ -38,7 +48,7 @@ export default function Signup(){
     return(
         <div className="auth-container">
             <h4>Sign up form</h4>
-            <form onSubmit={submitForm} method="post" >
+            <form onSubmit={submitForm} method="post" encType="multipart/form-data">
                 <label htmlFor="email">Email : </label>
                 <input onChange={(e) => setEmail(e.target.value)} value={email} type="text" name="email" id="email" required/><br/>
                 <label htmlFor="username">Username : </label>
@@ -53,6 +63,31 @@ export default function Signup(){
                 <input onChange={(e) => setBio(e.target.value)} type="text" name="bio" id="bio"/><br/>
                 <label htmlFor="hobbies">Hobbies : </label>
                 <input onChange={(e) => setHobby(e.target.value)} type="text" name="hobbies" id="hobbies"/><br/>
+                <label htmlFor="profilepic">Profile Picture : </label>
+                <input onChange={(e) => {
+                    const file = e.target.files[0];
+                    if(file){
+                        setProfilePic(file);
+                        setPreviewUrl(URL.createObjectURL(file));
+                    }
+                }} 
+                accept="image/*" type="file" name="profilepic" id="profilepic"/><br/>
+                {previewUrl && (
+                    <div style={{
+                        width: "100px",
+                        height: "100px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        marginTop: "10px",
+                        border: "2px solid #ccc"
+                    }}>
+                        <img
+                        src={previewUrl}
+                        alt="Preview"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                    </div>
+                    )}
                 <button type="submit">Submit</button>
             </form>
         </div>

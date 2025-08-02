@@ -1,28 +1,40 @@
-body {
+/* Reset & Base */
+* {
+  box-sizing: border-box;
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f7f7f7;
+  padding: 0;
 }
 
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Form Elements */
 input, textarea {
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid #ddd;
+  font-size: 1rem;
 }
 
 button {
   padding: 0.5rem 1rem;
   border: none;
-  background: #007bff;
+  background-color: #007bff;
   color: white;
   cursor: pointer;
   border-radius: 4px;
+  font-size: 1rem;
 }
 
 button:hover {
-  background: #0056b3;
+  background-color: #0056b3;
 }
 
+/* Links */
 a {
   text-decoration: none;
   color: #007bff;

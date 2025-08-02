@@ -32,6 +32,7 @@ model User{
   birthday       String
   bio            String
   hobbies        String 
+  profilePic     String?
   sentmessages  Messages[]  @relation("UserSentMessages")
   receivedmessages  Messages[]  @relation("UserReceivedMessages")
 
@@ -85,4 +86,5 @@ model Friends{
 
   requester  User  @relation("userRequestsFriend", fields: [request_to], references: [id])
   requested  User  @relation("userGetsRequest", fields: [request_by], references: [id])
+  @@unique([request_by, request_to])
 }

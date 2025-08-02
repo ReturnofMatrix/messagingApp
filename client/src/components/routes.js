@@ -2,11 +2,13 @@ import Signup from "./Signup";
 import Login from "./Login";
 import Home from "./Home";
 import Profile from "./Profile";
-import Friends from "./Friends";
 import Message from "./Message";
 import Post from "./Post";
 import Single from "./Single";
 import ProtectedRoute from "./ProtectedRoute";
+import MessageAFriend from "./MessageAFriend";
+import AllFriends from "./AllFriends";
+import Strangers from './Strangers'
 
 export const routes = [
     {
@@ -35,13 +37,20 @@ export const routes = [
                 element: < Single />
             },
             {
+                path: 'message',
+                element: <Message />,
+            },
+            {
+                path: 'message/:receiverId',
+                element: <MessageAFriend />
+            },
+            {
                 path: 'friends',
-                element: <Friends/>,
-                children: [
-                    {
-                        path: 'message/:receiverId',
-                        element: <Message />
-                    }]
+                element: <AllFriends/>,
+            },
+            {
+                path: 'strangers',
+                element: <Strangers />,
             },
             {
                 path: 'profile',

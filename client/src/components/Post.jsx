@@ -20,7 +20,6 @@ export default function Post(){
                 }
                 const data = await res.json()
                 setUserposts(data.posts);
-                console.log(userPosts);
             }catch(e){
                 console.log(e);
             }
@@ -58,7 +57,8 @@ export default function Post(){
                 <p><span style={{ marginRight: "50px"}}>
                     <strong>{post.likeCount}</strong>
                     <button onClick={() => likePost(post.id, setRefresh)}>{post.userLiked? <span>❤️</span>:<span>🤍</span>}
-                    </button></span><span><button onClick={() => commentOnPost(post.id, navigate)}>💬</button><strong>{post.commentsCount}</strong></span></p>
+                    </button></span><span><button onClick={() => commentOnPost(post.id, navigate)}>💬</button><strong>{post.commentsCount}</strong>
+                    </span></p>
             </div>)}
 
             <form onSubmit={createPost} className="form">

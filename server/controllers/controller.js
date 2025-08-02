@@ -2,7 +2,7 @@
 const db = require('../db/db');
 const bcrypt = require('bcrypt');
 const { body, validationResult} = require('express-validator');
-const { all } = require('../routes/routes');
+// const { all } = require('../routes/routes');
 
 const validateUser = [
     body('email').trim().notEmpty().withMessage('email must not be empty.'),
@@ -21,13 +21,16 @@ exports.signup = [ validateUser, async (req, res) => {
     if(!errors.isEmpty()){
         return res.status(400).json({ errors: errors.array()});
     }
+
     const { email, username, password, birthday, bio, hobbies} = req.body;
+    const profilePic = req.file?`/uploads/${req.file.filename}`: null;
+
     const alreadyRegistered = await db.alreadyRegistered(email);
     if(alreadyRegistered){
         return res.status(409).json({message: 'This email is already registered. use different one.'});
     }
     const hashedpass = await bcrypt.hash(password, 9);
-    const data = await db.signupUser(email, username, hashedpass, birthday, bio, hobbies);
+    const data = await db.signupUser(email, username, hashedpass, birthday, bio, hobbies, profilePic);
     console.log(data);
     
     return res.status(201).json({message : "user data has been inserted."});
@@ -74,16 +77,35 @@ exports.logout = async (req, res, next) => {
 // i have to return all the users except the logged in user.
 exports.home = async ( req, res) => {
     const id = req.user.id;
-    const allUsers = await db.getUsers(id);
-    res.status(200).json({ allUsers});
+    let messageFriends = await db.getMessageFriends(id);
+    messageFriends = messageFriends.map(friends => friends.requested);
+    res.status(200).json({ messageFriends});
+}
+
+exports.getProfilePic = async (req, res) => {
+    const id = req.user.id;
+    let profilePic = await db.getProfilePic(id);
+    res.status(200).json({ profilePic });
 }
 
 // i have to return all the info of the logged in user.
 exports.profile = async ( req, res) => {
     const id = req.user.id;
-    const allInfo = await db.getProfileInfo(id);
-    console.log(allInfo);
-    res.status(200).json({ allInfo});
+    const allProfileInfo = await db.getProfileInfo(id);
+    let posts = await db.getUserPosts(id);
+    posts = posts.map(post => {
+        const likeCount = post.hasLikes.length;
+        const userLiked = post.hasLikes.some(like => like.liked_by === id);
+        const commentsCount = post.hasComments.length;
+        return{
+            ...post,
+            likeCount,
+            userLiked,
+            commentsCount
+        }
+    });
+    console.log(allProfileInfo, posts );
+    res.status(200).json({ allProfileInfo, posts});
 }
 
 exports.edit = async ( req, res) => {
@@ -95,6 +117,13 @@ exports.edit = async ( req, res) => {
     const allInfo = await db.getProfileInfo(id);
     console.log(allInfo);
     res.status(200).json({ allInfo});
+}
+
+exports.editProfilePic = async ( req, res) => {
+    const id = req.user.id;
+    const profilePic = req.file? `/uploads/${req.file.filename}`: null;
+    const reply = await db.editProfilePic(id, profilePic);
+    res.status(200).json(reply);
 }
 
 //Post i can add 1) createPost 2) getAllPosts 3) deletePost
@@ -175,7 +204,7 @@ exports.addFriend = async ( req, res) => {
 }
 
 //accept and reject are both requests sent by someone else to us.
-// so request to will be us and request by someone else.
+// so request will be to us and request by someone else.
 // here while display friend list sender and receiver id will be sent.
 exports.acceptFriend = async ( req, res) => {
     const id = parseInt(req.params.id);
@@ -188,14 +217,33 @@ exports.rejectFriend = async ( req, res) => {
     res.status(201).json({ result });
 }
 
+exports.getStrangers = async (req, res) => {
+    const id = parseInt(req.user.id);
+    const result = await db.getStrangers(id);
+    res.status(201).json({ result });
+}
+
 // here request_by and request_to can be user as we want to show the
 // me as sender where request is accepted in friends. and other sent request 
 // to me for accept or reject.
 // but pending and accepted status will determine the friend or not status.
 exports.getAllFriends = async ( req, res) => {
     const id = parseInt(req.user.id);
-    const result = await db.getAllFriends(id);
-    res.status(201).json({ result });
+    const allFriends = await db.getAllFriends(id);
+    let onlyFriends = [], requestsToMe = [], myPendings = [];
+
+    for(const friend of allFriends){
+        if(friend.request_by === id && friend.accepted === true){
+            onlyFriends.push(friend);
+        }
+        if(friend.request_by === id && friend.pending === true && friend.accepted === false){
+            myPendings.push(friend);
+        }
+        if(friend.request_to === id && friend.pending === true && friend.accepted === false){
+            requestsToMe.push(friend);
+        }
+    }
+    res.status(201).json({ onlyFriends, requestsToMe, myPendings });
 }
 
 // here only request which logged in user made and which have been accepted.
