@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import '../css/Message.css';
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function MessageAFriend() {
   const { receiverId } = useParams();
@@ -17,7 +19,7 @@ export default function MessageAFriend() {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/message/${receiverId}`,
+        const res = await fetch(`${API_URL}/message/${receiverId}`,
           {
             credentials: 'include'
           }
@@ -41,7 +43,7 @@ export default function MessageAFriend() {
     const trimmedText = text.trim();
     if(trimmedText){
        try {
-        const res = await fetch(`http://localhost:4000/message/${receiverId}`,
+        const res = await fetch(`${API_URL}/message/${receiverId}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -5,6 +5,8 @@ import { likePost, commentOnPost } from "../utils/postActions";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
 import { usePostContext } from "../utils/postContext";
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Post(){
     const [userPosts, setUserposts] = useState([]);
@@ -17,7 +19,7 @@ export default function Post(){
     useEffect(() => {
         async function fetchIndex() {
             try{
-                const res = await fetch('http://localhost:4000/indexPage',
+                const res = await fetch(`${API_URL}/indexPage`,
                     {credentials: 'include'}
                 );
                 if(!res.ok){

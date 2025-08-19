@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import '../css/Friends.css';
 import { useTheme } from '../utils/ThemeContext';
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Message(){
     const [users, setUsers] = useState([]);
@@ -12,7 +14,7 @@ export default function Message(){
         () => {
             const getUsers = async () => {
                 try{
-                const res = await fetch('http://localhost:4000/home',
+                const res = await fetch(`${API_URL}/home`,
                     {
                         method: 'GET',
                         'credentials': 'include'

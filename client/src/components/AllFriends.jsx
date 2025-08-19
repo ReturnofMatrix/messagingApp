@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function AllFriends(){
     const [list, setFriends] = useState('');
@@ -11,7 +13,7 @@ export default function AllFriends(){
     useEffect(() => {
         async function fetchFriends() {
             try{
-                const res = await fetch('http://localhost:4000/friends/get',
+                const res = await fetch(`${API_URL}/friends/get`,
                     {credentials: 'include'}
                 );
                 if(!res.ok){

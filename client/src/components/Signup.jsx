@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../css/Auth.css';
 import imageCompression from 'browser-image-compression';
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Signup(){
     const [email, setEmail] = useState('');
@@ -45,7 +47,7 @@ export default function Signup(){
         
 
         try{
-            const res = await fetch('http://localhost:4000/signup',
+            const res = await fetch(`${API_URL}/signup`,
                 {
                     method: "POST",
                     body: formData

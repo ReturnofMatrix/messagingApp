@@ -3,6 +3,8 @@ import '../css/Home.css';
 import { useState } from "react";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Home(){
     // const [profilePic, setProfilePic] = useState(null);
@@ -14,7 +16,7 @@ export default function Home(){
 
     async function handleLogout(){
         try{
-            const res = await fetch('http://localhost:4000/logout',
+            const res = await fetch(`${API_URL}/logout`,
                 {
                     method: 'POST',
                     headers: {'Content-Type' : 'application/json'},

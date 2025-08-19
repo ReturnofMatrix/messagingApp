@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+require('dotenv').config();
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function ProtectedRoute({ children }){
     const [isLoggedin, setIsloggenin] = useState(null);
@@ -7,7 +9,7 @@ export default function ProtectedRoute({ children }){
     useEffect(() => {
         const fetchStatus = async (req, res) => {
             try{
-                const res = await fetch('http://localhost:4000/status',
+                const res = await fetch(`${API_URL}/status`,
                     {credentials: 'include'}
                 );
                 const data = await res.json();
