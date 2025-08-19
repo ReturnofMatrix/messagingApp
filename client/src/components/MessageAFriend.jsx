@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import '../css/Message.css';
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function MessageAFriend() {

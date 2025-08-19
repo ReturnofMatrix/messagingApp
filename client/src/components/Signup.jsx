@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../css/Auth.css';
 import imageCompression from 'browser-image-compression';
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Signup(){

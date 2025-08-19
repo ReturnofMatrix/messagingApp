@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../utils/ProfileContext";
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Login(){

@@ -4,7 +4,6 @@ import { likePost, commentOnPost } from "../utils/postActions";
 import { useTheme } from '../utils/ThemeContext';
 import imageCompression from 'browser-image-compression';
 import { useProfile } from "../utils/ProfileContext";
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Profile(){

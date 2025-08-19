@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import '../css/Friends.css';
 import { useTheme } from '../utils/ThemeContext';
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Message(){

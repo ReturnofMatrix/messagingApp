@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { likePost, commentOnPost } from "../utils/postActions";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../utils/ProfileContext";
-require('dotenv').config();
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Single(){
