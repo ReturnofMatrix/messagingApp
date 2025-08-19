@@ -28,6 +28,7 @@ model User{
   id             Int   @id @default(autoincrement())
   email          String @unique
   username       String  @unique
+  gender         String
   hashedpass     String
   birthday       String
   bio            String
@@ -46,7 +47,8 @@ model User{
 
 model Post{
   id   Int   @id   @default(autoincrement())
-  content   String
+  photo   String?
+  caption   String?
   created_at    DateTime
   author_id  Int
 

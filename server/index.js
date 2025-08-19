@@ -10,7 +10,7 @@ require('dotenv').config();
 
 app.use(cors({
     origin: 'http://localhost:3000',
-    'credentials': true
+    credentials: true
 }));
 app.use('/uploads', express.static('uploads'));
 
@@ -33,9 +33,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+app.use(routes);
+
+console.log("Cloudinary Key:", process.env.CLOUDINARY_API_KEY);
 
 app.listen(4000, () => {
     console.log('server is running on http://localhost:4000');
 });
 
-app.use(routes);

@@ -2,9 +2,9 @@
 const { PrismaClient } = require('../generated/prisma');
 const prisma = new PrismaClient();
 
-async function signupUser(email, username, hashedpass, birthday, bio, hobbies, profilePic) {
+async function signupUser(email, username,gender, hashedpass, birthday, bio, hobbies, profilePicUrl) {
     try{
-        return await prisma.user.create({data: { email, username, hashedpass, birthday, bio, hobbies, profilePic}})
+        return await prisma.user.create({data: { email, username, gender, hashedpass, birthday, bio, hobbies, profilePic: profilePicUrl}})
     }catch(err){
         console.log(err);
         throw err;
@@ -35,6 +35,19 @@ async function getAllMessages(senderid, receiverid) {
         orderBy: {
             time: 'asc'
         }
+    });
+}
+
+async function getFriendName(id) {
+    return await prisma.user.findFirst({
+        where: {id},
+        select: {username: true}
+    });
+}
+
+async function getUsername(id) {
+    return await prisma.user.findMany({
+        where: {id}, select: {username: true}
     });
 }
 
@@ -74,7 +87,7 @@ async function getProfilePic(id) {
 
 async function getProfileInfo(id) {
     return await prisma.user.findFirst({ 
-        where : {id}, omit: { hashedpass: true, id : true}
+        where : {id}, omit: { hashedpass: true, id : true, profilePic: true}
     });
 }
 
@@ -96,10 +109,25 @@ async function editProfilePic( id, profilePic) {
     });
 }
 
-async function createPost(author_id, content) {
+async function getGender(id) {
+    return await prisma.user.findMany({
+        where: {id},
+        select: {gender: true}
+    });
+}
+
+async function removeProfilePic(id, profilePic) {
+    return await prisma.user.update({
+        where: {id},
+        data: {profilePic}
+    });
+}
+
+async function createPost(author_id, caption, photo) {
     return await prisma.post.create({
         data: {
-            content, author_id, created_at: new Date()
+            caption, created_at: new Date(), photo, 
+            author: {connect: {id: author_id}}
         }
     })
 }
@@ -134,13 +162,13 @@ async function createComment(created_by, text, post_id) {
     })
 }
 
-async function getAllComments(id) {
+async function getAllOfPost(id) {
     console.log(id);
     return await prisma.post.findUnique({
         where: {id},
         include: { author: {select: { username: true}},
                    hasLikes: {select: {liked_by: true}},
-                   hasComments: true}
+                   hasComments: {include: {commenter: {select: {username: true}}}}}
     });
 }
 
@@ -238,9 +266,23 @@ async function getOnlyFriendsPost( request_by ) {
     });
 }
 
+async function getAllPosts( request_by ) {
+
+    return await prisma.post.findMany({
+        include: {
+            author: {select: {username: true}}, 
+            hasLikes: {select: {liked_by: true}},
+            hasComments: {select: {id : true}}
+        },
+        orderBy: {created_at : 'desc'}
+    });
+}
+
+
 module.exports = { signupUser, login, alreadyRegistered, sendMessage, 
-    getMessageFriends, getProfileInfo, getAllMessages, edit,editProfilePic, createPost,
-    getUserPosts, deletePost, createComment, getAllComments, deleteComment, 
+    getMessageFriends, getProfileInfo, getAllMessages, edit,editProfilePic, 
+    getGender, removeProfilePic, createPost,getUserPosts, getUsername,
+    deletePost, createComment, getAllOfPost, deleteComment, 
     handleLike, addFriend, acceptFriend, rejectFriend,getAllFriends, getStrangers, 
-    getOnlyFriendsPost, getProfilePic
+    getOnlyFriendsPost, getProfilePic, getAllPosts, getFriendName
 }

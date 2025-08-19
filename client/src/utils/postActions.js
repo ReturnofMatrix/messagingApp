@@ -19,5 +19,6 @@ export async function likePost(post_id, setRefresh) {
 }
 
 export function commentOnPost(id, navigate) {
-navigate(`/home/post/${id}`);
+    console.log('inside commentOnPost');
+    navigate(`/home/post/${id}`);
 }

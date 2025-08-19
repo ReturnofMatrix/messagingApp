@@ -8,7 +8,8 @@ import Single from "./Single";
 import ProtectedRoute from "./ProtectedRoute";
 import MessageAFriend from "./MessageAFriend";
 import AllFriends from "./AllFriends";
-import Strangers from './Strangers'
+import Strangers from './Strangers';
+import CreatePost from "./CreatePost";
 
 export const routes = [
     {
@@ -35,6 +36,10 @@ export const routes = [
             {
                 path: 'post/:id',
                 element: < Single />
+            },
+            {
+                path: 'createPost',
+                element: <CreatePost />
             },
             {
                 path: 'message',
