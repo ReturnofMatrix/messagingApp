@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import '../css/Post.css';
 import { useNavigate } from "react-router-dom";
 import { likePost, commentOnPost } from "../utils/postActions";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
 import { usePostContext } from "../utils/postContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Post(){
     const [userPosts, setUserposts] = useState([]);
@@ -18,7 +17,7 @@ export default function Post(){
     useEffect(() => {
         async function fetchIndex() {
             try{
-                const res = await fetch(`${API_URL}/indexPage`,
+                const res = await fetch(`${API_BASE_URL}/indexPage`,
                     {credentials: 'include'}
                 );
                 if(!res.ok){

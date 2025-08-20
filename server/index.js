@@ -8,10 +8,16 @@ const session = require('express-session');
 const cors = require('cors');
 require('dotenv').config();
 
+process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
+    ? process.env.NEON_DATABASE_URL
+    : process.env.LOCAL_DATABASE_URL;
+
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'production'
+        ? 'https://instachat-red.vercel.app': 'http://localhost:3000',
     credentials: true
 }));
+
 app.use('/uploads', express.static('uploads'));
 
 initialize(passport);
@@ -24,7 +30,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 1000 * 60 * 60
     }
@@ -35,9 +41,10 @@ app.use(passport.session());
 app.use(flash());
 app.use(routes);
 
-console.log("Cloudinary Key:", process.env.CLOUDINARY_API_KEY);
+const PORT = process.env.PORT || 4000;
 
-app.listen(4000, () => {
-    console.log('server is running on http://localhost:4000');
+app.listen(PORT, () => {
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`server is running on ${PORT}`);
 });
 

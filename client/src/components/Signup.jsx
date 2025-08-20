@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import '../css/Auth.css';
 import imageCompression from 'browser-image-compression';
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Signup(){
     const [email, setEmail] = useState('');
@@ -46,7 +45,7 @@ export default function Signup(){
         
 
         try{
-            const res = await fetch(`${API_URL}/signup`,
+            const res = await fetch(`${API_BASE_URL}/signup`,
                 {
                     method: "POST",
                     body: formData

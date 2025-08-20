@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Strangers(){
     const[strangers, setStrangers] = useState([]);
@@ -13,7 +13,7 @@ export default function Strangers(){
     useEffect(() => {
         async function fetchFriends() {
             try{
-                const res = await fetch(`${API_URL}/strangers`,
+                const res = await fetch(`${API_BASE_URL}/strangers`,
                     {credentials: 'include'}
                 );
                 if(!res.ok){
@@ -30,7 +30,7 @@ export default function Strangers(){
 
     async function follow(id) {
         try{
-                const res = await fetch(`${API_URL}/friend/request/${id}`,
+                const res = await fetch(`${API_BASE_URL}/friend/request/${id}`,
                     {credentials: 'include',
                         method: 'POST'
                     }

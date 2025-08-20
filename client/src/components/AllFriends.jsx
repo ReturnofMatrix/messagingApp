@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function AllFriends(){
     const [list, setFriends] = useState('');
@@ -12,7 +12,7 @@ export default function AllFriends(){
     useEffect(() => {
         async function fetchFriends() {
             try{
-                const res = await fetch(`${API_URL}/friends/get`,
+                const res = await fetch(`${API_BASE_URL}/friends/get`,
                     {credentials: 'include'}
                 );
                 if(!res.ok){
@@ -29,7 +29,7 @@ export default function AllFriends(){
 
     async function unfollow(id) {
         try{
-            const res = await fetch(`http://localhost:4000/friend/reject/${id}`,
+            const res = await fetch(`${API_BASE_URL}/friend/reject/${id}`,
                 {
                     credentials: 'include',
                     method: 'DELETE'
@@ -48,7 +48,7 @@ export default function AllFriends(){
 
     async function accept(id) {
         try{
-            const res = await fetch(`http://localhost:4000/friend/accept/${id}`,
+            const res = await fetch(`${API_BASE_URL}/friend/accept/${id}`,
                 {
                     credentials: 'include',
                     method: 'PUT'

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from '../utils/ThemeContext';
 import imageCompression from 'browser-image-compression';
 import { usePostContext } from "../utils/postContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function CreatePost(){
     const [caption, setCaption] = useState('');
@@ -48,7 +48,7 @@ export default function CreatePost(){
         setUploadingPost(uploadingPost);
 
         try{
-            const res = await fetch(`${API_URL}/post`,
+            const res = await fetch(`${API_BASE_URL}/post`,
                 {
                     credentials: 'include',
                     method: 'POST',

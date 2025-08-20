@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import '../css/Message.css';
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function MessageAFriend() {
   const { receiverId } = useParams();
@@ -18,7 +17,7 @@ export default function MessageAFriend() {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
-        const res = await fetch(`${API_URL}/message/${receiverId}`,
+        const res = await fetch(`${API_BASE_URL}/message/${receiverId}`,
           {
             credentials: 'include'
           }
@@ -42,7 +41,7 @@ export default function MessageAFriend() {
     const trimmedText = text.trim();
     if(trimmedText){
        try {
-        const res = await fetch(`${API_URL}/message/${receiverId}`,
+        const res = await fetch(`${API_BASE_URL}/message/${receiverId}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

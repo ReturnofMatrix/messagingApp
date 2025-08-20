@@ -1,9 +1,8 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import '../css/Home.css';
 import { useState } from "react";
 import { useTheme } from '../utils/ThemeContext';
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Home(){
     // const [profilePic, setProfilePic] = useState(null);
@@ -15,7 +14,7 @@ export default function Home(){
 
     async function handleLogout(){
         try{
-            const res = await fetch(`${API_URL}/logout`,
+            const res = await fetch(`${API_BASE_URL}/logout`,
                 {
                     method: 'POST',
                     headers: {'Content-Type' : 'application/json'},

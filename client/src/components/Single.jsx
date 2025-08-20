@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { likePost, commentOnPost } from "../utils/postActions";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Single(){
     const [post, setPost] = useState('');
@@ -16,7 +16,7 @@ export default function Single(){
     useEffect(() => {
         const fetchPost = async () => {
             try{
-                const res = await fetch(`${API_URL}/post/${id}`,
+                const res = await fetch(`${API_BASE_URL}/post/${id}`,
                     {
                         credentials: 'include',
                         headers: {'Content-Type': 'application/json'},
@@ -37,7 +37,7 @@ export default function Single(){
         e.preventDefault();
         if(!text.trim())return;
         try{
-                const res = await fetch(`${API_URL}/post/${post.id}/comment`,
+                const res = await fetch(`${API_BASE_URL}/post/${post.id}/comment`,
                     {
                         credentials: 'include',
                         method: 'POST',

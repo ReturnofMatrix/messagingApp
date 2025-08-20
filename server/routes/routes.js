@@ -58,6 +58,9 @@ router.post('/guestLogin',
         res.status(200).json({ loggedIn : true, user: req.user});
     }
  );
+router.get('/test', (req, res) => {
+  res.json({ message: 'Server is working!' });
+});
 
 
 module.exports = router;

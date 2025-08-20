@@ -4,7 +4,7 @@ import { likePost, commentOnPost } from "../utils/postActions";
 import { useTheme } from '../utils/ThemeContext';
 import imageCompression from 'browser-image-compression';
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Profile(){
     const [profileData, setProfileData] = useState({});
@@ -25,7 +25,7 @@ export default function Profile(){
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch(`${API_URL}/profile`, {
+                const res = await fetch(`${API_BASE_URL}/profile`, {
                     credentials: 'include'   
                 });
                 if (!res.ok) {
@@ -46,7 +46,7 @@ export default function Profile(){
         if (!editKey || !editValue.trim()) return;
         
         try {
-            const res = await fetch(`${API_URL}/edit`, {
+            const res = await fetch(`${API_BASE_URL}/edit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -90,7 +90,7 @@ export default function Profile(){
             formData.append('profilePic', compressedFile);
             setProfilePic(previewUrl);
 
-            const res = await fetch(`${API_URL}/editProfilePic`, {
+            const res = await fetch(`${API_BASE_URL}/editProfilePic`, {
                 method: 'POST',
                 credentials: 'include',
                 body: formData
@@ -118,7 +118,7 @@ export default function Profile(){
         }, 3000);
 
         try {
-            const res = await fetch(`${API_URL}/removeProfilePic`, {
+            const res = await fetch(`${API_BASE_URL}/removeProfilePic`, {
                 method: 'POST',
                 credentials: 'include',
             });

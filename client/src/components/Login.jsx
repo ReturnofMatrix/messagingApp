@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../utils/ProfileContext";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function Login(){
     const [username, setUsername] = useState('');
@@ -12,7 +12,7 @@ export default function Login(){
     async function handleSubmit(e) {
         e.preventDefault();
         try{ 
-            const res = await fetch(`${API_URL}/login`, {
+            const res = await fetch(`${API_BASE_URL}/login`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include',
@@ -35,7 +35,7 @@ export default function Login(){
     async function guestLogin(e) {
         e.preventDefault();
         try{ 
-            const res = await fetch(`${API_URL}/guestLogin`, {
+            const res = await fetch(`${API_BASE_URL}/guestLogin`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include',

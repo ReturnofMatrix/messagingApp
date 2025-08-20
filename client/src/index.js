@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { routes } from './components/routes';
-import './css/Shared.css';
 import { createBrowserRouter, RouterProvider} from 'react-router-dom';
 import { ThemeProvider } from './utils/ThemeContext';
 import { ProfileProvider } from './utils/ProfileContext';
 import { PostProvider } from './utils/postContext';
+import './index.css';
 const router = createBrowserRouter(routes);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

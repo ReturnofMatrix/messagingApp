@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { API_BASE_URL } from "./api";
 
 const ProfileContext = createContext();
 
@@ -16,7 +17,7 @@ export const ProfileProvider = ({ children }) =>{
 
     const fetchProfilePic = async () => {
         try {
-            const res = await fetch('http://localhost:4000/getProfilePic', {
+            const res = await fetch(`${API_BASE_URL}/getProfilePic`, {
             credentials: 'include'
             });
             if (!res.ok) throw new Error();

@@ -1,6 +1,8 @@
+import { API_BASE_URL } from "./api";
+
 export async function likePost(post_id, setRefresh) {
     try{
-        const res = await fetch(`http://localhost:4000/post/${post_id}/like`,
+        const res = await fetch(`${API_BASE_URL}/post/${post_id}/like`,
             {
                 credentials: 'include',
                 method: 'POST',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-const API_URL = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from "../utils/api";
 
 export default function ProtectedRoute({ children }){
     const [isLoggedin, setIsloggenin] = useState(null);
@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children }){
     useEffect(() => {
         const fetchStatus = async (req, res) => {
             try{
-                const res = await fetch(`${API_URL}/status`,
+                const res = await fetch(`${API_BASE_URL}/status`,
                     {credentials: 'include'}
                 );
                 const data = await res.json();
