@@ -3,5 +3,3 @@ node_modules
 .env
 
 /generated/prisma
-
-'postgresql://neondb_owner:npg_3vybwFYEX2Sq@ep-sparkling-shadow-a16jqerh-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
