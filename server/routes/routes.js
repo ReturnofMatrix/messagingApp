@@ -64,5 +64,16 @@ router.post('/guestLogin',
         res.status(200).json({ loggedIn : true, user: req.user});
     }
  );
+router.get('/session-test', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    isAuthenticated: req.isAuthenticated(),
+    hasSession: !!req.session,
+    sessionData: req.session,
+    user: req.user,
+    cookies: req.headers.cookie,
+    timestamp: new Date().toISOString()
+  });
+});
 
 module.exports = router;
