@@ -24,7 +24,10 @@ import { API_BASE_URL } from "../utils/api";
             const data = await res.json();
             console.log('Login response:', data);
             if (data.loggedIn) {
-                const sessionTest = await fetch(`${API_BASE_URL}/session-test`, { credentials: 'include' });
+                const sessionTest = await fetch(`${API_BASE_URL}/session-test`, {
+                    credentials: 'include',
+                    headers: { 'Cookie': document.cookie } // Force cookie
+                });
                 console.log('Session test:', await sessionTest.json());
                 setIsLoggedIn(true);
                 navigate('/home');

@@ -16,17 +16,25 @@ export const ProfileProvider = ({ children }) =>{
     }, [isLoggedIn]);
 
     const fetchProfilePic = async () => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/getProfilePic`, {
-            credentials: 'include'
-            });
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            setProfilePic(data.profilePic.profilePic);
-        } catch (e) {
-            console.log(e);
+    try {
+        console.log('Fetching profile pic from:', `${API_BASE_URL}/getProfilePic`);
+        const res = await fetch(`${API_BASE_URL}/getProfilePic`, {
+            credentials: 'include',
+            headers: { 'Cookie': document.cookie }
+        });
+        console.log('Response headers:', Object.fromEntries(res.headers));
+        if (!res.ok) {
+            const errorData = await res.json();
+            console.error('Error response:', errorData);
+            throw new Error(`Failed to fetch profile picture: ${res.status}`);
         }
-    }
+        const data = await res.json();
+        console.log('Profile pic data:', data);
+        setProfilePic(data.profilePic.profilePic);
+        } catch (e) {
+            console.error('Error fetching profile pic:', e);
+        }
+    };
 
     return(
         <ProfileContext.Provider value={{

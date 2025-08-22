@@ -48,6 +48,11 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24
     }
 }));
+app.use((req, res, next) => {
+    console.log('Request cookies:', req.headers.cookie);
+    console.log('Session ID:', req.sessionID);
+    next();
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
