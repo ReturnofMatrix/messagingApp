@@ -5,7 +5,9 @@ const {initialize} = require('./controllers/passport-config.js');
 const passport = require('passport');
 const flash = require('connect-flash');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors');
+
 require('dotenv').config();
 
 process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
@@ -25,6 +27,11 @@ app.use(express.urlencoded({ extended: false}));
 app.use(express.json());
 
 app.use(session({
+    store: new pgSession({
+        conString: process.env.DATABASE_URL,
+        tableName: 'session',
+        createTableIfMissing: true
+    }),
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
@@ -32,7 +39,7 @@ app.use(session({
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
