@@ -28,7 +28,6 @@ export const ProfileProvider = ({ children }) =>{
         }
     }
 
-
     return(
         <ProfileContext.Provider value={{
     profilePic, setProfilePic, fetchProfilePic, isGuest, setIsGuest, setIsLoggedIn,
