@@ -16,7 +16,10 @@ process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
 
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://instachat-delta.vercel.app' : 'http://localhost:3000',
+        ? [
+        'https://instachat-delta.vercel.app',    
+        /^https:\/\/instachat-.*\.vercel\.app$/        
+      ] : 'http://localhost:3000',
     credentials: true
 }));
 
