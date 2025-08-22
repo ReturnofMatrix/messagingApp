@@ -29,6 +29,7 @@ router.post('/login', controllers.validateUserlogin,
                 console.error('Session save error:', err);
                 return res.status(500).json({ message: 'Session save failed' });
             }
+            res.setHeader('Set-Cookie', `connect.sid=${req.sessionID}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=86400`);
             res.status(200).json({ loggedIn: true, message: 'User is logged in', user: req.user });
         });
     }

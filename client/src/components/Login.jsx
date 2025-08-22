@@ -19,13 +19,13 @@ import { API_BASE_URL } from "../utils/api";
                 body: JSON.stringify({ username, password })
             });
             console.log('Cookies after login:', document.cookie);
+            console.log('Response headers:', Object.fromEntries(res.headers));
             if (!res.ok) throw new Error();
             const data = await res.json();
             console.log('Login response:', data);
             if (data.loggedIn) {
                 const sessionTest = await fetch(`${API_BASE_URL}/session-test`, { credentials: 'include' });
-                const sessionData = await sessionTest.json();
-                console.log('Session test:', sessionData);
+                console.log('Session test:', await sessionTest.json());
                 setIsLoggedIn(true);
                 navigate('/home');
             }

@@ -20,7 +20,9 @@ app.use(cors({
         'https://instachat-delta.vercel.app',    
         /^https:\/\/instachat-.*\.vercel\.app$/        
       ] : 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
 }));
 
 app.use('/uploads', express.static('uploads'));
