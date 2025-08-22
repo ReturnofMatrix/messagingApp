@@ -34,8 +34,9 @@ function initialize(passport){
     passport.serializeUser((user, done) => done(null, user.id));
     
     passport.deserializeUser(async (id, done) => {
+
         try{
-            const user = await prisma.user.findUnique({ where: {id}});
+            const user = await prisma.user.findUnique({ where: {id: parseInt(id)}});
             return done(null, user);
         }catch(err){
             return done(err);
