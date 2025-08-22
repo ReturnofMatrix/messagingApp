@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useProfile } from "../utils/ProfileContext";
 import { API_BASE_URL } from "../utils/api";
 
-export default function Login(){
-    const [username, setUsername] = useState('');
-    const [password, setPass] = useState('');
-    const { setIsGuest, setIsLoggedIn } = useProfile();
-    const navigate = useNavigate();
+    export default function Login(){
+        const [username, setUsername] = useState('');
+        const [password, setPass] = useState('');
+        const { setIsGuest, setIsLoggedIn } = useProfile();
+        const navigate = useNavigate();
 
-    async function handleSubmit(e) {
+        async function handleSubmit(e) {
         e.preventDefault();
         try {
             const res = await fetch(`${API_BASE_URL}/login`, {
@@ -24,7 +24,8 @@ export default function Login(){
             console.log('Login response:', data);
             if (data.loggedIn) {
                 const sessionTest = await fetch(`${API_BASE_URL}/session-test`, { credentials: 'include' });
-                console.log('Session test:', await sessionTest.json());
+                const sessionData = await sessionTest.json();
+                console.log('Session test:', sessionData);
                 setIsLoggedIn(true);
                 navigate('/home');
             }

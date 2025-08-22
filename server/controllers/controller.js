@@ -94,11 +94,20 @@ exports.home = async ( req, res) => {
     res.status(200).json({ messageFriends});
 }
 
+// controllers/controller.js
 exports.getProfilePic = async (req, res) => {
-    const id = req.user.id;
-    let profilePic = await db.getProfilePic(id);
-    res.status(200).json({ profilePic});
-}
+    try {
+        console.log('getProfilePic user:', req.user);
+        if (!req.user) return res.status(401).json({ message: 'No user in session' });
+        const id = req.user.id;
+        const profilePic = await db.getProfilePic(id);
+        if (!profilePic) return res.status(404).json({ message: 'Profile picture not found' });
+        res.status(200).json({ profilePic });
+    } catch (err) {
+        console.error('Error in getProfilePic:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
 // i have to return all the info of the logged in user.
 exports.profile = async ( req, res) => {
