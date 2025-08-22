@@ -15,17 +15,56 @@ router.post('/upload', upload.single('image'), (req, res) => {
   });
 });
 router.post('/signup',upload.single('profilePic'), controllers.signup);
+// router.post('/login', controllers.validateUserlogin,
+//     passport.authenticate('local',{ failureFlash: true}),
+//     ( req, res)=> {
+//         res.status(200).json({ loggedIn : true, message: 'User is logged in', user: req.user});
+//     }
+// );
 router.post('/login', controllers.validateUserlogin,
-    passport.authenticate('local',{ failureFlash: true}),
-    ( req, res)=> {
-        res.status(200).json({ loggedIn : true, message: 'User is logged in', user: req.user});
-    }
+  passport.authenticate('local', { failureFlash: true }),
+  (req, res) => {
+    console.log('🎉 LOGIN SUCCESS:');
+    console.log('- Session ID:', req.sessionID);
+    console.log('- Session data:', req.session);
+    console.log('- User ID:', req.user.id);
+    console.log('- Is authenticated:', req.isAuthenticated());
+    
+    res.status(200).json({ 
+      loggedIn: true, 
+      message: 'User is logged in', 
+      user: req.user
+    });
+  }
 );
 router.get('/message/:receiverId', isAuthenticated, controllers.getMessages);
 router.post('/message/:receiverId', isAuthenticated, controllers.message );
 router.post('/logout',isAuthenticated, controllers.logout);
 router.get('/home',isAuthenticated, controllers.home);
-router.get('/getProfilePic', isAuthenticated, controllers.getProfilePic);
+// router.get('/getProfilePic', isAuthenticated, controllers.getProfilePic);
+router.get('/getProfilePic', (req, res) => {
+  console.log('🖼️ GET PROFILE PIC REQUEST:');
+  console.log('- Session ID:', req.sessionID);
+  console.log('- Session data:', req.session);
+  console.log('- Is authenticated:', req.isAuthenticated());
+  console.log('- User:', req.user);
+  
+  if (!req.isAuthenticated()) {
+    console.log('❌ Not authenticated - sending 401');
+    return res.status(401).json({ message: "you need to be logged in." });
+  }
+  
+  // Continue with your getProfilePic logic
+  controllers.getProfilePic;
+});
+router.get('/session-test', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    isAuthenticated: req.isAuthenticated(),
+    session: req.session,
+    user: req.user
+  });
+});
 router.get('/profile',isAuthenticated, controllers.profile);
 router.post('/edit', isAuthenticated, controllers.edit);
 router.post('/editProfilePic', isAuthenticated, upload.single('profilePic'),
