@@ -11,31 +11,25 @@ export default function Login(){
 
     async function handleSubmit(e) {
         e.preventDefault();
-        try{ 
+        try {
             const res = await fetch(`${API_BASE_URL}/login`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 credentials: 'include',
-                body: JSON.stringify({ username, password})
+                body: JSON.stringify({ username, password })
             });
-            if(!res.ok){
-                throw new Error();
-            }
+            console.log('Cookies after login:', document.cookie);
+            if (!res.ok) throw new Error();
             const data = await res.json();
-            console.log(data);
-            if(data.loggedIn){
-
-                const sessionTest = await fetch(`${API_BASE_URL}/session-test`, {
-                credentials: 'include'
-                });
-            const sessionData = await sessionTest.json();
-            console.log('Session test result:', sessionData);
-
+            console.log('Login response:', data);
+            if (data.loggedIn) {
+                const sessionTest = await fetch(`${API_BASE_URL}/session-test`, { credentials: 'include' });
+                console.log('Session test:', await sessionTest.json());
                 setIsLoggedIn(true);
                 navigate('/home');
             }
-        }catch(e){
-            console.log(e);
+        } catch (e) {
+            console.error('Login error:', e);
         }
     }
 

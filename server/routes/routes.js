@@ -14,10 +14,23 @@ router.post('/upload', upload.single('image'), (req, res) => {
   });
 });
 router.post('/signup',upload.single('profilePic'), controllers.signup);
+// router.post('/login', controllers.validateUserlogin,
+//     passport.authenticate('local',{ failureFlash: true}),
+//     ( req, res)=> {
+//         res.status(200).json({ loggedIn : true, message: 'User is logged in', user: req.user});
+//     }
+// );
 router.post('/login', controllers.validateUserlogin,
-    passport.authenticate('local',{ failureFlash: true}),
-    ( req, res)=> {
-        res.status(200).json({ loggedIn : true, message: 'User is logged in', user: req.user});
+    passport.authenticate('local', { failureFlash: true }),
+    (req, res) => {
+        console.log('Login session ID:', req.sessionID);
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ message: 'Session save failed' });
+            }
+            res.status(200).json({ loggedIn: true, message: 'User is logged in', user: req.user });
+        });
     }
 );
 router.get('/message/:receiverId', isAuthenticated, controllers.getMessages);

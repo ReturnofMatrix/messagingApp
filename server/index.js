@@ -33,7 +33,8 @@ app.use(session({
     store: new pgSession({
         conString: process.env.DATABASE_URL,
         tableName: 'session',
-        createTableIfMissing: true
+        createTableIfMissing: true,
+        errorLog: (err) => console.error('Session store error:', err)
     }),
     secret: process.env.SECRET,
     resave: false,
