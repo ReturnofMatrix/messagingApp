@@ -58,16 +58,22 @@ router.put('/friend/accept/:id', isAuthenticated, controllers.acceptFriend);
 router.delete('/friend/reject/:id', isAuthenticated, controllers.rejectFriend);
 router.get('/friends/get', isAuthenticated, controllers.getAllFriends);
 router.get('/indexPage', isAuthenticated, controllers.getIndexPage);
-
 router.post('/guestLogin', 
     passport.authenticate('local',{ failureFlash: true}),
     ( req, res)=> {
         res.status(200).json({ loggedIn : true, user: req.user});
     }
  );
-router.get('/test', (req, res) => {
-  res.json({ message: 'Server is working!' });
+ router.get('/session-test', (req, res) => {
+  res.json({
+    sessionID: req.sessionID,
+    isAuthenticated: req.isAuthenticated(),
+    hasSession: !!req.session,
+    sessionData: req.session,
+    user: req.user,
+    cookies: req.headers.cookie,
+    timestamp: new Date().toISOString()
+  });
 });
-
 
 module.exports = router;

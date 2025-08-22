@@ -24,6 +24,12 @@ export default function Login(){
             const data = await res.json();
             console.log(data);
             if(data.loggedIn){
+                const testRes = await fetch(`${API_BASE_URL}/session-test`, {
+                    credentials: 'include'
+                });
+                const testData = await testRes.json();
+                console.log('Session test:', testData);
+                
                 setIsLoggedIn(true);
                 navigate('/home');
             }

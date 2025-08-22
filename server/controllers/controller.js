@@ -97,9 +97,6 @@ exports.home = async ( req, res) => {
 exports.getProfilePic = async (req, res) => {
     const id = req.user.id;
     let profilePic = await db.getProfilePic(id);
-    console.log(profilePic);
-    let isGuest = false;
-    if(id === 1)isGuest = true;
     res.status(200).json({ profilePic});
 }
 
