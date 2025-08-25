@@ -83,7 +83,7 @@ exports.login = async ( req, res) => {
             console.log('htllo;');
             return res.status(200).cookie('token', token, {httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                     maxAge: 3600000}).json({ token, loggedIn: true });
     }catch(err){
         console.error('Login error:', err);

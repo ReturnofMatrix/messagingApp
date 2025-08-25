@@ -20,9 +20,8 @@ export const ProfileProvider = ({ children }) =>{
         console.log('Fetching profile pic from:', `${API_BASE_URL}/getProfilePic`);
         const res = await fetch(`${API_BASE_URL}/getProfilePic`, {
             credentials: 'include',
-            headers: { 'Cookie': document.cookie }
         });
-        console.log('Response headers:', Object.fromEntries(res.headers));
+        console.log('Response status:', res.status);
         if (!res.ok) {
             const errorData = await res.json();
             console.error('Error response:', errorData);
