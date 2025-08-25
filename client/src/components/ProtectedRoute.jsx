@@ -11,9 +11,14 @@ export default function ProtectedRoute({ children }){
                 const res = await fetch(`${API_BASE_URL}/status`,
                     {credentials: 'include'}
                 );
-                const data = await res.json();
-                setIsloggenin(data.isLoggedin);
+                if(res.ok){
+                    const data = await res.json();
+                    setIsloggenin(data.isLoggedin);
+                }else{
+                    setIsloggenin(false);
+                }  
             }catch(e){
+                setIsloggenin(false);
                 console.log(e);
             }
         }
@@ -24,7 +29,7 @@ export default function ProtectedRoute({ children }){
         return <div>Loading...</div>
     }
     if (!isLoggedin) {
-        return <div>401 Unauthorized — please <a href="/">Login</a>.</div>;
+        return <Navigate to='/' replace/>;
     }
     return children
 }

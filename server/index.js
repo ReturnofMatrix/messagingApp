@@ -2,10 +2,9 @@ const express = require('express');
 const app = express();
 const routes = require('./routes/routes');
 const {initialize} = require('./controllers/passport-config.js');
+const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const flash = require('connect-flash');
-const session = require('express-session');
-const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors');
 
 require('dotenv').config();
@@ -28,34 +27,11 @@ app.use(cors({
 app.use('/uploads', express.static('uploads'));
 
 initialize(passport);
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false}));
 app.use(express.json());
 
-app.use(session({
-    store: new pgSession({
-        conString: process.env.DATABASE_URL,
-        tableName: 'session',
-        createTableIfMissing: true,
-        errorLog: (err) => console.error('Session store error:', err)
-    }),
-    secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production'? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24
-    }
-}));
-app.use((req, res, next) => {
-    console.log('Request cookies:', req.headers.cookie);
-    console.log('Session ID:', req.sessionID);
-    next();
-});
-
 app.use(passport.initialize());
-app.use(passport.session());
 app.use(flash());
 app.use(routes);
 

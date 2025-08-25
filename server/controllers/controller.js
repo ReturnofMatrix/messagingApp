@@ -2,7 +2,9 @@
 const db = require('../db/db');
 const bcrypt = require('bcrypt');
 const { body, validationResult} = require('express-validator');
-// const { all } = require('../routes/routes');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require("../generated/prisma");
+const prisma = new PrismaClient();
 
 const validateUser = [
     body('email').trim().notEmpty().withMessage('email must not be empty.'),
@@ -11,7 +13,7 @@ const validateUser = [
     body('conpass').custom((value, {req}) => {
         return value === req.body.password
     }).withMessage('password and confirm password should match.'),
-    // body('age').trim().notEmpty().message('age must not be empty.'),
+    body('birthday').notEmpty().withMessage('age must not be empty.'),
 ]
 
 exports.signup = [ validateUser, async (req, res) => {
@@ -59,6 +61,37 @@ exports.validateUserlogin = [
     }
 ]
 
+exports.login = async ( req, res) => {
+    try{
+        const { username, password } = req.body;
+            console.log('Login attempt for:', req.body.username);
+            const user = await prisma.user.findUnique({
+                where: { username}
+            });
+            if(!user){
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+            const match = await bcrypt.compare(password, user.hashedpass);
+            if(!match){
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+            const token = jwt.sign(
+                { userId: user.id, userEmail: user.email},
+                process.env.JWT_SECRET,
+                { expiresIn: '1h'}
+            );
+            console.log('htllo;');
+            return res.status(200).cookie('token', token, {httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                    maxAge: 3600000}).json({ token, loggedIn: true });
+    }catch(err){
+        console.error('Login error:', err);
+        return res.status(500).json({ message: 'server error.'});
+    }
+
+}
+
 exports.getMessages = async ( req, res) => {
     const receiverid = parseInt(req.params.receiverId);
     const senderid = req.user.id;
@@ -70,20 +103,13 @@ exports.getMessages = async ( req, res) => {
 exports.message = async (req, res) => {
     const receiverid = parseInt(req.params.receiverId);
     const senderid = req.user.id;
-    let text = req.body.text;
-    const reply = await db.sendMessage(senderid, receiverid, text);
     const allMessages = await db.getAllMessages(senderid, receiverid);
     return res.status(201).json({allMessages, myId: senderid});
 }
 
-exports.logout = async (req, res, next) => {
-    req.logout(err => {
-        if(err){return next(err);}
-        req.session.destroy(() => {
-            res.clearCookie('conect.sid');
-            return res.status(200).json({ message: 'logged out and cookie cleared successfully.'});
-        });
-    });
+exports.logout = async (req, res) => {
+    res.clearCookie('token');
+    res.json({message: 'logged out successfully.'});
 }
 
 // i have to return all the users except the logged in user.

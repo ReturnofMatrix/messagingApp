@@ -1,54 +1,42 @@
 // passport-config.js
-
-const LocalStrategy = require('passport-local').Strategy;
+const { Strategy: JwtStrategy, ExtractJwt} = require('passport-jwt');
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
-const bcrypt = require('bcrypt');
+const passport = require('passport');
 
-function initialize(passport){
-    const authenticateUser = async ( username, password, done) => {
-
-        try{
-            const user = await prisma.user.findUnique({
-                where: { username}
-            });
-            if(!user){
-                return done(null, false, {message: "No user found."})
-            }
-
-            const match = await bcrypt.compare(password, user.hashedpass);
-
-            if(match){
-                return done(null, user);
-            }else{
-                return done(null, false, { message: "Wrong password !"});
-            }
-
-        }catch(err){
-            return done(err);
-        }
-    };
-
-    passport.use(new LocalStrategy(authenticateUser));
-
-    passport.serializeUser((user, done) => done(null, user.id));
-    
-    passport.deserializeUser(async (id, done) => {
-
-        try{
-            const user = await prisma.user.findUnique({ where: {id: parseInt(id)}});
-            return done(null, user);
-        }catch(err){
-            return done(err);
-        }
-    });
+const opts = {
+    jwtFromRequest: ExtractJwt.fromExtractors([
+        ( req ) => req.cookies?.token
+    ]),
+    secretOrKey: process.env.JWT_SECRET
 }
 
+function initialize(passport){
+    passport.use(new JwtStrategy( opts, async ( jwt_payload, done) => {
+        try{
+            const user = await prisma.user.findUnique({
+                where: { id: jwt_payload.userId }
+            });
+            if(user){
+                return done(null, user);
+            }
+            else{
+                return done(null, false, {message: 'No user found.'});
+            }
+        }catch(err){
+            return done(err);
+        }
+    }));
+};
+
 function isAuthenticated(req, res, next){
-    if(req.isAuthenticated()){
-        return next()
-    }
-    return res.status(401).json({message : "you need to be logged in."});
+    passport.authenticate('jwt', { session: false}, (err, user, info) => {
+        if( err || !user){
+            return res.status(401).json({ message: info?.message || 'Unauthorized'});
+        }
+        req.user = user;
+        next();
+    })(req, res, next);
 }
 
 module.exports = { initialize, isAuthenticated };
