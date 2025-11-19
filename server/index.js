@@ -12,32 +12,14 @@ const {setupSocket } = require('./controllers/socket.js');
 const { Server } = require("socket.io");
 require('dotenv').config();
 
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [
-      'https://instachat-delta.vercel.app',
-      'https://instachat-zeta.vercel.app',
-      'https://instachat.vercel.app',
-      /^https:\/\/instachat-.*\.vercel\.app$/
-    ]
-  : ['http://localhost:3000'];
-
 const corsOptions = {
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    const allowed = allowedOrigins.some((allowedOrigin) =>
-      typeof allowedOrigin === 'string'
-        ? allowedOrigin === origin
-        : allowedOrigin.test(origin)
-    );
-    return callback(null, allowed);
-  },
+  origin: true, // reflect request origin
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 };
 
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
 
 process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
     ? process.env.NEON_DATABASE_URL
@@ -45,14 +27,10 @@ process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
 
 const server = http.createServer(app);
 const io = new Server(server, {
-        cors: {
-        origin: process.env.NODE_ENV === 'production'
-            ? [
-            'https://instachat-delta.vercel.app',    
-            /^https:\/\/instachat-.*\.vercel\.app$/        
-        ] : 'http://localhost:3000',
-        credentials: true
-    }
+  cors: {
+    origin: true,
+    credentials: true
+  }
 });
 
 app.set('io', io);
