@@ -13,23 +13,19 @@ const { Server } = require("socket.io");
 require('dotenv').config();
 
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? ['https://instachat-delta.vercel.app', /^https:\/\/instachat-.*\.vercel\.app$/]
+  ? [
+      'https://instachat-delta.vercel.app',
+      'https://instachat-zeta.vercel.app',
+      'https://instachat.vercel.app'
+    ]
   : ['http://localhost:3000'];
 
-const corsOptions = {
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    const isAllowed = allowedOrigins.some((allowed) =>
-      allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
-    );
-    callback(isAllowed ? null : new Error('Not allowed by CORS'), isAllowed);
-  },
+app.use(cors({
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-app.use(cors(corsOptions));
+}));
 
 process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
     ? process.env.NEON_DATABASE_URL
