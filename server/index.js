@@ -16,21 +16,24 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
       'https://instachat-delta.vercel.app',
       'https://instachat-zeta.vercel.app',
-      'https://instachat.vercel.app'
+      'https://instachat.vercel.app',
+      /^https:\/\/instachat-.*\.vercel\.app$/
     ]
   : ['http://localhost:3000'];
 
 const corsOptions = {
   origin(origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
+    const allowed = allowedOrigins.some((allowedOrigin) =>
+      typeof allowedOrigin === 'string'
+        ? allowedOrigin === origin
+        : allowedOrigin.test(origin)
+    );
+    return callback(null, allowed);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 };
 
 app.use(cors(corsOptions));
