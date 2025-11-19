@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { API_BASE_URL } from "../utils/api";
 
 export default function ProtectedRoute({ children }){
     const [isLoggedin, setIsloggenin] = useState(null);
@@ -7,12 +8,17 @@ export default function ProtectedRoute({ children }){
     useEffect(() => {
         const fetchStatus = async (req, res) => {
             try{
-                const res = await fetch('http://localhost:4000/status',
+                const res = await fetch(`${API_BASE_URL}/status`,
                     {credentials: 'include'}
                 );
-                const data = await res.json();
-                setIsloggenin(data.isLoggedin);
+                if(res.ok){
+                    const data = await res.json();
+                    setIsloggenin(data.isLoggedin);
+                }else{
+                    setIsloggenin(false);
+                }  
             }catch(e){
+                setIsloggenin(false);
                 console.log(e);
             }
         }
@@ -23,7 +29,7 @@ export default function ProtectedRoute({ children }){
         return <div>Loading...</div>
     }
     if (!isLoggedin) {
-        return <div>401 Unauthorized — please <a href="/">Login</a>.</div>;
+        return <Navigate to='/' replace/>;
     }
     return children
 }

@@ -1,3 +1,9 @@
+some features to add to the project 
+1) create post feature make it as an plus icon on the left of header.
+2) if a user does't select a photo. add a person emoji as profile pic.
+3) instaChat use name as home button.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

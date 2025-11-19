@@ -28,10 +28,12 @@ model User{
   id             Int   @id @default(autoincrement())
   email          String @unique
   username       String  @unique
+  gender         String
   hashedpass     String
   birthday       String
   bio            String
   hobbies        String 
+  profilePic     String?
   sentmessages  Messages[]  @relation("UserSentMessages")
   receivedmessages  Messages[]  @relation("UserReceivedMessages")
 
@@ -45,7 +47,8 @@ model User{
 
 model Post{
   id   Int   @id   @default(autoincrement())
-  content   String
+  photo   String?
+  caption   String?
   created_at    DateTime
   author_id  Int
 
@@ -62,6 +65,7 @@ model Likes{
 
   post   Post  @relation("postHasLikes", fields: [post_id], references: [id])
   user  User  @relation("UserLikedPost",fields: [liked_by], references: [id])
+  @@unique([liked_by, post_id])
 }
 
 model Comment{
@@ -84,4 +88,5 @@ model Friends{
 
   requester  User  @relation("userRequestsFriend", fields: [request_to], references: [id])
   requested  User  @relation("userGetsRequest", fields: [request_by], references: [id])
+  @@unique([request_by, request_to])
 }
