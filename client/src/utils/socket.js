@@ -8,7 +8,7 @@ const socket = io(
   process.env.NODE_ENV === "production" ? PROD_URL : DEV_URL,
   {
     withCredentials: true,
-    transports: ["websocket"],
+    transports: ["polling", "websocket"]
   }
 );
 
