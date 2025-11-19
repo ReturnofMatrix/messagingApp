@@ -30,7 +30,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
     ? process.env.NEON_DATABASE_URL
