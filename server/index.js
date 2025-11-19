@@ -36,6 +36,13 @@ const io = new Server(server, {
         credentials: true
     }
 });
+io.engine.on("headers", (headers, req) => {
+  headers["Access-Control-Allow-Origin"] = process.env.NODE_ENV === "production"
+    ? "https://instachat-delta.vercel.app"
+    : "http://localhost:3000";
+
+  headers["Access-Control-Allow-Credentials"] = "true";
+});
 
 app.set('io', io);
 setupSocket(io);
