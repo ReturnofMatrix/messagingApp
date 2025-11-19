@@ -1,8 +1,15 @@
 // utils/socket.js
-import {io} from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4000", {
+const PROD_URL = "https://messagingapp-ej7a.onrender.com";
+const DEV_URL = "http://localhost:4000";
+
+const socket = io(
+  process.env.NODE_ENV === "production" ? PROD_URL : DEV_URL,
+  {
+    withCredentials: true,
     transports: ["websocket"],
-});
+  }
+);
 
 export default socket;
