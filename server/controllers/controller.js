@@ -186,6 +186,7 @@ exports.removeProfilePic = async ( req, res) => {
     const id = req.user.id;
     const gender = await db.getGender(id);
     console.log(gender);
+    let profilePic;
     if(gender[0].gender === 'male'){
         profilePic = 'https://res.cloudinary.com/dttkcwuw8/image/upload/v1755161523/instachat/emftojoa0fopwpockhg5.webp'
     }else if(gender[0].gender === 'female'){
