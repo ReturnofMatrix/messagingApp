@@ -17,14 +17,18 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t messaging-server ./server
+        run: docker build -t messaging-server -f server/Dockerfile server
 
       - name: Run container and verify health
         run: |
-          docker run -d -p 4000:4000 --name test-server messaging-server
+          docker run -d -p 4000:4000 \
+            -e NODE_ENV=development \
+            -e PORT=4000 \
+            --name test-server messaging-server
           sleep 5
           docker logs test-server
           curl -f http://localhost:4000 || exit 1
 
       - name: Stop container
         run: docker stop test-server
+
