@@ -17,7 +17,8 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t messaging-server -f server/Dockerfile server
+        run: docker build -t messaging-server -f Dockerfile .
+        working-directory: ./server
 
       - name: Run container and verify health
         run: |
