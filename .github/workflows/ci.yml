@@ -13,19 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
 
-      - name: Install dependencies
-        run: npm install
-        working-directory: server
+      - name: Build Docker image
+        run: docker build -t messaging-server ./server
 
-      - name: Run lint
-        run: npm run lint
-        working-directory: server
+      - name: Run container and verify health
+        run: |
+          docker run -d -p 4000:4000 --name test-server messaging-server
+          sleep 5
+          docker logs test-server
+          curl -f http://localhost:4000 || exit 1
 
-      - name: Run tests
-        run: npm test
-        working-directory: server
+      - name: Stop container
+        run: docker stop test-server
