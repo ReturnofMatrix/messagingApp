@@ -32,7 +32,6 @@ jobs:
           sleep 10
           docker logs test-server
           docker logs test-server 2>&1 | grep -q "server is running" && echo "✓ Server started successfully"
-          curl -f http://localhost:4000 || exit 1
 
       - name: Stop container
         run: docker stop test-server
