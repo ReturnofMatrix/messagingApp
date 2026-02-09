@@ -38,7 +38,7 @@ jobs:
         run: |
           cd server
           IMAGE_TAG=${GITHUB_SHA::7}
-          IMAGE_NAME=ghcr.io/${{ github.actor }}/messaging-server:$IMAGE_TAG
+          IMAGE_NAME=ghcr.io/returnofmatrix/messaging-server:$IMAGE_TAG
           docker buildx build --load -t $IMAGE_NAME .
           docker push $IMAGE_NAME
 
