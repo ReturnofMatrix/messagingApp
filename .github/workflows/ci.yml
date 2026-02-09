@@ -36,12 +36,8 @@ jobs:
           cd server
           docker buildx build --load -t messaging-server .
 
-      - name: Run container and verify it's healthy
+      - name: Run container and verify health
         run: |
-          # ────────────────────────────────────────────────
-          # Important: attach to the same network as services
-          # Use ${{ job.container.network }}  → GitHub gives us this magic variable
-          # ────────────────────────────────────────────────
           docker run -d \
             --name test-server \
             --network ${{ job.container.network }} \
@@ -51,27 +47,12 @@ jobs:
             -e DATABASE_URL=postgresql://postgres:postgres@postgres:5432/messagingApp \
             messaging-server
 
-          echo "Waiting a bit for server to start..."
-          sleep 12   # ← give extra 2 seconds — databases can be slow first time
+          sleep 12
 
-          echo "Container logs:"
           docker logs test-server
+          docker logs test-server | grep -q "server is running" && echo "✓ Server started"
+          docker exec test-server curl -sf http://localhost:4000/health && echo "✓ Health check passed"
 
-          echo "Checking for startup message..."
-          docker logs test-server | grep -q "server is running" && echo "✓ Server printed 'server is running'"
-
-          echo "Health check with retry..."
-          for i in {1..5}; do
-            if docker exec test-server curl -f http://localhost:4000/health; then
-              echo "✓ Health endpoint responds 200"
-              exit 0
-            fi
-            echo "Attempt $i failed, retrying in 3 seconds..."
-            sleep 3
-          done
-          echo "Health check failed after 5 attempts"
-          exit 1
-
-      - name: Stop and clean up
-        if: always()           # run even if previous step fails — good practice
+      - name: Clean up
+        if: always()
         run: docker stop test-server || true
