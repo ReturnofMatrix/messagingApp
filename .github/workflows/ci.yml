@@ -52,7 +52,7 @@ jobs:
             -e PORT=4000 \
             -e JWT_SECRET=thisIsTheforbiddenFruit. \
             -e DATABASE_URL=postgresql://postgres:postgres@postgres:5432/messagingApp \
-            messaging-server:$IMAGE_TAG
+            $IMAGE_NAME
 
           sleep 12
 
