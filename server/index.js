@@ -11,6 +11,13 @@ const http = require('http');
 const {setupSocket } = require('./controllers/socket.js');
 const { Server } = require("socket.io");
 require('dotenv').config();
+const { PrismaClient } = require('./generated/prisma');
+const prisma = new PrismaClient();
+global.prisma = prisma;
+
+prisma.$connect()
+  .then(() => console.log('✓ Database connected'))
+  .catch(err => console.error('Database connection failed:', err));
 
 const corsOptions = {
   origin: true, // reflect request origin

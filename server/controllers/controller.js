@@ -352,9 +352,10 @@ exports.getIndexPage = async ( req, res) => {
 
 exports.checkHealth = async (req, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await global.prisma.$queryRaw`SELECT 1`;
     res.status(200).json({ status: 'ok', db: 'connected' });
   } catch (err) {
-    res.status(503).json({ status: 'error', db: 'not connected' });
+    console.error('Health check error:', err);
+    res.status(503).json({ status: 'error', db: 'not connected', error: err.message });
   }
 }
