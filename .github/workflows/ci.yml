@@ -60,10 +60,17 @@ jobs:
           echo "Checking for startup message..."
           docker logs test-server | grep -q "server is running" && echo "✓ Server printed 'server is running'"
 
-          echo "Health check from the HOST..."
-          # Because we didn't publish port → we cannot curl localhost anymore
-          # Instead → run curl *inside* the container!
-          docker exec test-server curl -f http://localhost:4000/health && echo "✓ Health endpoint responds 200"
+          echo "Health check with retry..."
+          for i in {1..5}; do
+            if docker exec test-server curl -f http://localhost:4000/health; then
+              echo "✓ Health endpoint responds 200"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 3 seconds..."
+            sleep 3
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1
 
       - name: Stop and clean up
         if: always()           # run even if previous step fails — good practice
