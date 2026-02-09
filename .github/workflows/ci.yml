@@ -39,6 +39,7 @@ jobs:
 
       - name: Run container and verify health
         run: |
+          IMAGE_TAG=${GITHUB_SHA::7}
           docker run -d \
             --name test-server \
             --network ${{ job.container.network }} \
