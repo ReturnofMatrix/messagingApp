@@ -12,6 +12,11 @@ const {setupSocket } = require('./controllers/socket.js');
 const { Server } = require("socket.io");
 require('dotenv').config();
 const { PrismaClient } = require('./generated/prisma');
+
+process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
+    ? process.env.NEON_DATABASE_URL
+    : process.env.LOCAL_DATABASE_URL;
+    
 const prisma = new PrismaClient();
 global.prisma = prisma;
 
@@ -27,10 +32,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-process.env.DATABASE_URL = process.env.NODE_ENV === 'production'
-    ? process.env.NEON_DATABASE_URL
-    : process.env.LOCAL_DATABASE_URL;
 
 const server = http.createServer(app);
 const io = new Server(server, {
