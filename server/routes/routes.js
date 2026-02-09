@@ -12,6 +12,7 @@ router.post('/upload', upload.single('image'), (req, res) => {
     imageUrl: req.file.path,
   });
 });
+router.get('/health', controllers.checkHealth);
 router.post('/signup',upload.single('profilePic'), controllers.signup);
 router.post('/login', controllers.validateUserlogin,
     controllers.login);

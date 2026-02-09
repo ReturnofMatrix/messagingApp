@@ -28,7 +28,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
@@ -36,18 +36,35 @@ jobs:
           cd server
           docker buildx build --load -t messaging-server .
 
-      - name: Run container and verify health
+      - name: Run container and verify it's healthy
         run: |
-          docker run -d --network host \
+          # ────────────────────────────────────────────────
+          # Important: attach to the same network as services
+          # Use ${{ job.container.network }}  → GitHub gives us this magic variable
+          # ────────────────────────────────────────────────
+          docker run -d \
+            --name test-server \
+            --network ${{ job.container.network }} \
             -e NODE_ENV=development \
             -e PORT=4000 \
             -e JWT_SECRET=thisIsTheforbiddenFruit. \
-            -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/messagingApp \
-            --name test-server messaging-server
+            -e DATABASE_URL=postgresql://postgres:postgres@postgres:5432/messagingApp \
+            messaging-server
 
-          sleep 10
+          echo "Waiting a bit for server to start..."
+          sleep 12   # ← give extra 2 seconds — databases can be slow first time
+
+          echo "Container logs:"
           docker logs test-server
-          docker logs test-server | grep -q "server is running" && echo "✓ Server started successfully"
 
-      - name: Stop container
-        run: docker stop test-server
+          echo "Checking for startup message..."
+          docker logs test-server | grep -q "server is running" && echo "✓ Server printed 'server is running'"
+
+          echo "Health check from the HOST..."
+          # Because we didn't publish port → we cannot curl localhost anymore
+          # Instead → run curl *inside* the container!
+          docker exec test-server curl -f http://localhost:4000/health && echo "✓ Health endpoint responds 200"
+
+      - name: Stop and clean up
+        if: always()           # run even if previous step fails — good practice
+        run: docker stop test-server || true

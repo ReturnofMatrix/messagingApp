@@ -349,3 +349,12 @@ exports.getIndexPage = async ( req, res) => {
     const username = await db.getUsername(request_by);
     res.status(200).json({ posts, username: username[0].username });
 }
+
+exports.checkHealth = async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ status: 'ok', db: 'connected' });
+  } catch (err) {
+    res.status(503).json({ status: 'error', db: 'not connected' });
+  }
+}
