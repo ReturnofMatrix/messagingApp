@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      APP_ENV: ci
+
     services:
       postgres:
         image: postgres:15
@@ -49,7 +52,7 @@ jobs:
           docker run -d \
             --name test-server \
             --network ${{ job.container.network }} \
-            -e NODE_ENV=development \
+            -e NODE_ENV=${{ env.APP_ENV }} \
             -e PORT=4000 \
             -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
