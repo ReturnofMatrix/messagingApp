@@ -44,11 +44,11 @@ jobs:
           IMAGE_BASE=ghcr.io/returnofmatrix/messaging-server
 
           docker buildx build --load \ 
-            -t IMAGE_BASE:$IMAGE_TAG \
-            -t IMAGE_BASE:ci_latest \
+            -t $IMAGE_BASE:$IMAGE_TAG \
+            -t $IMAGE_BASE:ci_latest \
             .
           docker push $IMAGE_BASE:$IMAGE_TAG
-          docker push $IMAGE_BASE:$ci_latest
+          docker push $IMAGE_BASE:ci_latest
 
       - name: Run container and verify health
         run: |
