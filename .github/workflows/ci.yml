@@ -58,7 +58,7 @@ jobs:
           sleep 12
 
           docker logs test-server
-          docker logs test-server | grep -q "server is running" && echo "✓ Server started"
+          docker logs test-server | grep -q "server is running." && echo "✓ Server started"
           docker exec test-server curl -sf http://localhost:4000/health && echo "✓ Health check passed"
 
       - name: Clean up
