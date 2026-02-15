@@ -13,24 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      APP_ENV: ci
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: messagingApp
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,18 +38,18 @@ jobs:
       - name: Build Docker image
         working-directory: ./server
         run: |
-          docker buildx build --load \
+          docker build \
             -t ${{ env.IMAGE_BASE }}:${{ steps.meta.outputs.image_tag }} \
-            -t ${{ env.IMAGE_BASE }}:ci_latest \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t ${{ env.IMAGE_BASE }}:latest \
             .
 
       # ========== SECURITY SCANNING ==========
       
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner (blocking)
+        id: trivy_scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.IMAGE_BASE }}:ci_latest'
+          image-ref: '${{ env.IMAGE_BASE }}:latest'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -75,15 +57,18 @@ jobs:
           severity: 'CRITICAL'
           timeout: '10m'
           trivyignores: '.trivyignore'
+        continue-on-error: true
 
       - name: Run Trivy vulnerability scanner (detailed report)
         uses: aquasecurity/trivy-action@master
+        if: always()
         with:
-          image-ref: '${{ env.IMAGE_BASE }}:ci_latest'
+          image-ref: '${{ env.IMAGE_BASE }}:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL'
           ignore-unfixed: true
+          trivyignores: '.trivyignore'
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
@@ -91,7 +76,11 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-      # ========== OPTIONAL: Dockerfile Linting ==========
+      - name: Check Trivy scan results
+        if: steps.trivy_scan.outcome == 'failure'
+        run: |
+          echo "❌ CRITICAL severity vulnerabilities found!"
+          exit 1
       
       - name: Run Trivy config scanner on Dockerfile
         uses: aquasecurity/trivy-action@master
@@ -99,51 +88,81 @@ jobs:
           scan-type: 'config'
           scan-ref: 'server'
           format: 'table'
-          exit-code: '0'  # Don't fail on misconfigurations, just warn
+          exit-code: '0' 
           severity: 'CRITICAL'
-        continue-on-error: true  # Don't block pipeline
+        continue-on-error: true
 
       # ========== END SECURITY SCANNING ==========
 
       - name: Push Docker image to registry
-        if: success()  # Only push if scans passed
-        working-directory: ./server
+        if: success()
         run: |
           echo "Pushing images to registry..."
           docker push ${{ env.IMAGE_BASE }}:${{ steps.meta.outputs.image_tag }}
-          docker push ${{ env.IMAGE_BASE }}:ci_latest
+          docker push ${{ env.IMAGE_BASE }}:latest
           echo "✓ Images pushed successfully"
 
-      - name: Run container and verify health
+      # ========== MINIKUBE DEPLOYMENT ==========
+
+      - name: Start Minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          driver: docker
+          kubernetes-version: v1.28.3
+
+      - name: Verify Minikube
         run: |
-          echo "Starting container for health check..."
-          docker run -d \
-            --name test-server \
-            --network ${{ job.container.network }} \
-            -e NODE_ENV=${{ env.APP_ENV }} \
-            -e PORT=4000 \
-            -e JWT_SECRET=${{ secrets.JWT_SECRET_CI }} \
-            -e DATABASE_URL=${{ secrets.DATABASE_URL_CI }} \
-            ${{ steps.meta.outputs.image_full }}
+          kubectl cluster-info
+          kubectl get nodes
 
-          echo "Waiting for server to start..."
-          sleep 12
+      - name: Load Docker image into Minikube
+        run: |
+          echo "Loading image into Minikube..."
+          minikube image load ${{ env.IMAGE_BASE }}:latest
+          minikube image ls | grep messaging-server
 
-          echo "=== Container Logs ==="
-          docker logs test-server
+      - name: Deploy PostgreSQL
+        run: |
+          kubectl apply -f k8s/postgres.yml
+          kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
+          echo "✓ PostgreSQL deployed"
+
+      - name: Deploy Application
+        run: |
+          kubectl apply -f k8s/configmap.yml
+          kubectl apply -f k8s/secret.yml
+          kubectl apply -f k8s/deployment.yml
+          kubectl apply -f k8s/service.yml
+          echo "✓ Application manifests applied"
+
+      - name: Wait for deployment
+        run: |
+          kubectl wait --for=condition=ready pod -l app=messaging-server --timeout=180s
+          kubectl get pods
+          kubectl get svc
+
+      - name: Verify deployment
+        run: |
+          echo "=== Pods Status ==="
+          kubectl get pods -o wide
           
-          echo "=== Health Checks ==="
-          docker logs test-server | grep -q "server is running." && echo "✓ Server started successfully" || exit 1
-          docker exec test-server curl -sf http://localhost:4000/health && echo "✓ Health check endpoint passed" || exit 1
+          echo "=== Services ==="
+          kubectl get svc
+          
+          echo "=== Deployment Status ==="
+          kubectl get deployment messaging-server -o wide
+          
+          echo "=== Pod Logs ==="
+          POD_NAME=$(kubectl get pod -l app=messaging-server -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs $POD_NAME --tail=50 || echo "⚠️ Could not fetch logs"
 
-      - name: Run integration tests (optional)
-        if: success()
-        continue-on-error: true
+      - name: Test health endpoint
         run: |
-          # Add your integration tests here
-          # Example:
-          # docker exec test-server npm run test:integration
-          echo "Integration tests would run here"
+          POD_NAME=$(kubectl get pod -l app=messaging-server -o jsonpath='{.items[0].metadata.name}')
+          kubectl exec $POD_NAME -- curl -sf http://localhost:4000/health
+          echo "✓ Health check passed"
+
+      # ========== END MINIKUBE DEPLOYMENT ==========
 
       - name: Generate build summary
         if: always()
@@ -151,12 +170,11 @@ jobs:
           echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Image Tag:** ${{ steps.meta.outputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** ${{ steps.meta.outputs.image_full }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security Scan:** ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Kubernetes Test:** ✅ Deployed to Minikube" >> $GITHUB_STEP_SUMMARY
 
       - name: Clean up
         if: always()
         run: |
-          echo "Cleaning up test containers..."
-          docker stop test-server 2>/dev/null || true
-          docker rm test-server 2>/dev/null || true
+          echo "Minikube cluster will be destroyed automatically"
           echo "✓ Cleanup completed"

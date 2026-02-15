@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-server
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: messaging-server
+  template:
+    metadata:
+      labels:
+        app: messaging-server
+    spec:
+      containers:
+        - name: messaging-server
+          image: ghcr.io/returnofmatrix/messaging-server:latest 
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: messaging-config
+            - secretRef:
+                name: messaging-secret
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 5

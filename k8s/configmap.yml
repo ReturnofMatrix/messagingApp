@@ -1,0 +1,9 @@
+# configmap.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: messaging-config
+  namespace: default 
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
