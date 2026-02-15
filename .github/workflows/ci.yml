@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   pull_request:
 
+env:
+  IMAGE_BASE: ghcr.io/returnofmatrix/messaging-server
+  REGISTRY: ghcr.io
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,25 +39,83 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push docker image
+      - name: Extract image metadata
+        id: meta
         run: |
-          cd server
           IMAGE_TAG=${GITHUB_SHA::7}
-          IMAGE_BASE=ghcr.io/returnofmatrix/messaging-server
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image_full=${{ env.IMAGE_BASE }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "Building image: ${{ env.IMAGE_BASE }}:$IMAGE_TAG"
 
+      - name: Build Docker image
+        working-directory: ./server
+        run: |
           docker buildx build --load \
-            -t $IMAGE_BASE:$IMAGE_TAG \
-            -t $IMAGE_BASE:ci_latest \
+            -t ${{ env.IMAGE_BASE }}:${{ steps.meta.outputs.image_tag }} \
+            -t ${{ env.IMAGE_BASE }}:ci_latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
             .
-          docker push $IMAGE_BASE:$IMAGE_TAG
-          docker push $IMAGE_BASE:ci_latest
+
+      # ========== SECURITY SCANNING ==========
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_BASE }}:ci_latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          timeout: '10m'
+
+      - name: Run Trivy vulnerability scanner (detailed report)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_BASE }}:ci_latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      # ========== OPTIONAL: Dockerfile Linting ==========
+      
+      - name: Run Trivy config scanner on Dockerfile
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'server'
+          format: 'table'
+          exit-code: '0'  # Don't fail on misconfigurations, just warn
+          severity: 'CRITICAL,HIGH,MEDIUM'
+        continue-on-error: true  # Don't block pipeline
+
+      # ========== END SECURITY SCANNING ==========
+
+      - name: Push Docker image to registry
+        if: success()  # Only push if scans passed
+        working-directory: ./server
+        run: |
+          echo "Pushing images to registry..."
+          docker push ${{ env.IMAGE_BASE }}:${{ steps.meta.outputs.image_tag }}
+          docker push ${{ env.IMAGE_BASE }}:ci_latest
+          echo "✓ Images pushed successfully"
 
       - name: Run container and verify health
         run: |
-          IMAGE_TAG=${GITHUB_SHA::7}
-          IMAGE_NAME=ghcr.io/returnofmatrix/messaging-server:$IMAGE_TAG
+          echo "Starting container for health check..."
           docker run -d \
             --name test-server \
             --network ${{ job.container.network }} \
@@ -61,14 +123,39 @@ jobs:
             -e PORT=4000 \
             -e JWT_SECRET=${{ secrets.JWT_SECRET_CI }} \
             -e DATABASE_URL=${{ secrets.DATABASE_URL_CI }} \
-            $IMAGE_NAME
+            ${{ steps.meta.outputs.image_full }}
 
+          echo "Waiting for server to start..."
           sleep 12
 
+          echo "=== Container Logs ==="
           docker logs test-server
-          docker logs test-server | grep -q "server is running." && echo "✓ Server started"
-          docker exec test-server curl -sf http://localhost:4000/health && echo "✓ Health check passed"
+          
+          echo "=== Health Checks ==="
+          docker logs test-server | grep -q "server is running." && echo "✓ Server started successfully" || exit 1
+          docker exec test-server curl -sf http://localhost:4000/health && echo "✓ Health check endpoint passed" || exit 1
+
+      - name: Run integration tests (optional)
+        if: success()
+        continue-on-error: true
+        run: |
+          # Add your integration tests here
+          # Example:
+          # docker exec test-server npm run test:integration
+          echo "Integration tests would run here"
+
+      - name: Generate build summary
+        if: always()
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tag:** ${{ steps.meta.outputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ steps.meta.outputs.image_full }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Clean up
         if: always()
-        run: docker stop test-server || true
+        run: |
+          echo "Cleaning up test containers..."
+          docker stop test-server 2>/dev/null || true
+          docker rm test-server 2>/dev/null || true
+          echo "✓ Cleanup completed"
