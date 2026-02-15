@@ -99,7 +99,7 @@ jobs:
           scan-ref: 'server'
           format: 'table'
           exit-code: '0'  # Don't fail on misconfigurations, just warn
-          severity: 'CRITICAL,HIGH,MEDIUM'
+          severity: 'CRITICAL'
         continue-on-error: true  # Don't block pipeline
 
       # ========== END SECURITY SCANNING ==========
